@@ -278,18 +278,29 @@ window.fetchAllData = async function() {
 
 /* ─── REALTIME CLOCKS (JST & TST) ─── */
 function updateRealtimeClocks() {
+  function formatTimeZone(timeZone, offsetHours) {
+    try {
+      const formatter = new Intl.DateTimeFormat('en-GB', {
+        timeZone: timeZone,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      return formatter.format(new Date());
+    } catch (e) {
+      // Fallback: math-based calculation
+      const now = new Date();
+      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const tzDate = new Date(utc + (3600000 * offsetHours));
+      const pad = n => String(n).padStart(2, '0');
+      return `${pad(tzDate.getHours())}:${pad(tzDate.getMinutes())}:${pad(tzDate.getSeconds())}`;
+    }
+  }
+
   try {
-    const now = new Date();
-    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-
-    // 日本 JST = UTC+9, 台灣 TST = UTC+8
-    const jstDate = new Date(utc + (3600000 * 9));
-    const tstDate = new Date(utc + (3600000 * 8));
-
-    const pad = n => String(n).padStart(2, '0');
-
-    const jstStr = `${pad(jstDate.getHours())}:${pad(jstDate.getMinutes())}:${pad(jstDate.getSeconds())}`;
-    const tstStr = `${pad(tstDate.getHours())}:${pad(tstDate.getMinutes())}:${pad(tstDate.getSeconds())}`;
+    const jstStr = formatTimeZone('Asia/Tokyo', 9);
+    const tstStr = formatTimeZone('Asia/Taipei', 8);
 
     const jstEl = document.getElementById('jstClock');
     const tstEl = document.getElementById('tstClock');
