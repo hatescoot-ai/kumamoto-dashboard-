@@ -278,15 +278,31 @@ window.fetchAllData = async function() {
 
 /* ─── REALTIME CLOCKS (JST & TST) ─── */
 function updateRealtimeClocks() {
-  const now = new Date();
-  const jst = now.toLocaleTimeString('zh-TW', { timeZone: 'Asia/Tokyo', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const tst = now.toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  
-  const jstEl = document.getElementById('jstClock');
-  const tstEl = document.getElementById('tstClock');
-  if (jstEl) jstEl.textContent = jst;
-  if (tstEl) tstEl.textContent = tst;
+  try {
+    const now = new Date();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+
+    // 日本 JST = UTC+9, 台灣 TST = UTC+8
+    const jstDate = new Date(utc + (3600000 * 9));
+    const tstDate = new Date(utc + (3600000 * 8));
+
+    const pad = n => String(n).padStart(2, '0');
+
+    const jstStr = `${pad(jstDate.getHours())}:${pad(jstDate.getMinutes())}:${pad(jstDate.getSeconds())}`;
+    const tstStr = `${pad(tstDate.getHours())}:${pad(tstDate.getMinutes())}:${pad(tstDate.getSeconds())}`;
+
+    const jstEl = document.getElementById('jstClock');
+    const tstEl = document.getElementById('tstClock');
+
+    if (jstEl) jstEl.textContent = jstStr;
+    if (tstEl) tstEl.textContent = tstStr;
+  } catch (err) {
+    console.error('Clock error:', err);
+  }
 }
+
+// 立即執行
+updateRealtimeClocks();
 setInterval(updateRealtimeClocks, 1000);
 
 /* ─── INIT ─── */
