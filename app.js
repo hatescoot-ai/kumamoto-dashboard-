@@ -204,7 +204,7 @@ async function loadGdelt(query, newsId, tags, fallback) {
     if (!d.articles?.length) { renderNews(newsId, fallback); return; }
     const items = d.articles.slice(0,8).map(a => ({
       title: a.title||'（無標題）',
-      time: a.seendate ? (() => { try { return new Date(a.seendate.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,'$1-$2-$3T$4:$5:$6Z')).toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}); } catch{ return ''; } })() : '',
+      time: a.seendate ? (() => { try { return new Date(a.seendate.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,'$1-$2-$3T$4:$5:$6Z')).toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}); } catch(e){ return ''; } })() : '',
       source: a.domain||'新聞媒體', summary:'', tags, url: a.url||'#',
     }));
     renderNews(newsId, [...(fallback||[]), ...items].slice(0,12));
