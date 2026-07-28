@@ -276,9 +276,23 @@ window.fetchAllData = async function() {
   }
 };
 
+/* ─── REALTIME CLOCKS (JST & TST) ─── */
+function updateRealtimeClocks() {
+  const now = new Date();
+  const jst = now.toLocaleTimeString('zh-TW', { timeZone: 'Asia/Tokyo', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const tst = now.toLocaleTimeString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  
+  const jstEl = document.getElementById('jstClock');
+  const tstEl = document.getElementById('tstClock');
+  if (jstEl) jstEl.textContent = jst;
+  if (tstEl) tstEl.textContent = tst;
+}
+setInterval(updateRealtimeClocks, 1000);
+
 /* ─── INIT ─── */
 document.addEventListener('DOMContentLoaded', () => {
   initCanvas();
+  updateRealtimeClocks();
 
   // Show first section
   showSection('sec-transport');

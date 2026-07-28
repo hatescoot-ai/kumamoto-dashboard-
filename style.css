@@ -46,7 +46,40 @@ body { font-family:var(--font); background:var(--bg); color:var(--txt); min-heig
   border-bottom:1px solid rgba(255,45,61,0.22);
   box-shadow:0 4px 24px rgba(255,45,61,0.12);
 }
+.disclaimer-banner {
+  background: linear-gradient(90deg, rgba(255,136,0,0.25), rgba(255,45,61,0.25));
+  border-bottom: 1px solid rgba(255,136,0,0.35);
+  padding: .4rem 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  font-size: .8rem;
+  color: #ffffff;
+  font-weight: 500;
+  letter-spacing: .02em;
+}
+.disclaimer-icon { font-size: 1rem; }
+
 .header-inner { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.8rem 1.8rem; flex-wrap:wrap; }
+
+/* Clock Group */
+.clock-group { display: flex; gap: .6rem; flex-wrap: wrap; }
+.clock-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: .35rem .7rem;
+  min-width: 125px;
+}
+.jst-box { border-color: rgba(255,45,61,0.35); background: rgba(255,45,61,0.08); }
+.tst-box { border-color: rgba(0,136,255,0.35); background: rgba(0,136,255,0.08); }
+.clock-head { font-size: .63rem; color: var(--txt2); font-weight: 700; display: flex; align-items: center; gap: .3rem; }
+.clock-time { font-size: .95rem; font-weight: 800; color: #ffffff; font-variant-numeric: tabular-nums; letter-spacing: .03em; }
 
 .header-left { display:flex; align-items:center; gap:1rem; }
 .alert-badge.pulse-ring {

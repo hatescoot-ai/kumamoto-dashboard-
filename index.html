@@ -17,6 +17,10 @@
 
 <!-- ===== HEADER ===== -->
 <header class="site-header">
+  <div class="disclaimer-banner">
+    <span class="disclaimer-icon">📢</span>
+    <span class="disclaimer-text"><strong>系統提示：</strong>此為官方資訊整理，詳細內容請再次跟官方確認。</span>
+  </div>
   <div class="header-inner">
     <div class="header-left">
       <div class="alert-badge pulse-ring"><span>⚠</span></div>
@@ -26,6 +30,16 @@
       </div>
     </div>
     <div class="header-right">
+      <div class="clock-group">
+        <div class="clock-box jst-box">
+          <span class="clock-head"><span class="flag-icon">🇯🇵</span> 日本時間 JST</span>
+          <span class="clock-time" id="jstClock">--:--:--</span>
+        </div>
+        <div class="clock-box tst-box">
+          <span class="clock-head"><span class="flag-icon">🇹🇼</span> 台灣時間 TST</span>
+          <span class="clock-time" id="tstClock">--:--:--</span>
+        </div>
+      </div>
       <div class="mag-box"><span class="box-label">規模</span><span class="box-val red">7.1</span><span class="box-unit">M</span></div>
       <div class="mag-box orange"><span class="box-label">最大震度</span><span class="box-val">7</span></div>
       <div class="timer-wrap">
