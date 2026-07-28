@@ -22,10 +22,10 @@ const HISTORY_KEY = 'kumamoto_airline_history_v2';
 
 function loadHistory() {
   try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || {}; }
-  catch { return {}; }
+  catch(e) { return {}; }
 }
 function saveHistory(h) {
-  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); } catch {}
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); } catch(e) {}
 }
 function addHistory(airline, content) {
   const h = loadHistory();
