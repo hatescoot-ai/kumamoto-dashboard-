@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <meta name="description" content="熊本地震即時資訊總覽 - 鐵公路交通、景點、台灣航班、每5分鐘更新"/>
+  <meta name="description" content="熊本地震即時資訊總覽 - 鐵公路交通、景點、台灣航班、每5分鐘更新（資料來源：JMA、JR九州、NEXCO西日本、高千穗觀光協會等官方網站）"/>
   <meta property="og:title" content="熊本地震·即時資訊總覽"/>
   <meta property="og:description" content="熊本M7.1強震 · JR交通 · 景點狀況 · 台灣航班 · 每5分鐘自動更新"/>
   <title>熊本地震·即時資訊總覽</title>
@@ -45,7 +45,7 @@
   </div>
   <div class="status-bar">
     <div class="sitem"><span class="sdot live"></span><span id="lastUpdateText">載入中...</span></div>
-    <div class="sitem"><span class="sdot warn"></span><span>海嘯警報：有明海・八代海</span></div>
+    <div class="sitem"><span class="sdot ok"></span><span>✅ 海嘯注意報：18:10 已全面解除（JMA官方）</span></div>
     <div class="sitem"><span class="sdot danger"></span><span>九州新幹線全線停擺</span></div>
     <div class="sitem"><span class="sdot ok"></span><span>西九州新幹線 17:55 已再開</span></div>
     <div class="sitem"><span class="sdot purple"></span><span>外交部緊急：0800-085-095</span></div>
@@ -83,15 +83,15 @@
       <div class="rail-detail-grid">
         <div class="rail-detail-item">
           <span class="rdi-label">停駛區間</span>
-          <span class="rdi-val suspended-text">博多 ↔ 鹿兒島中央 全線</span>
+          <span class="rdi-val suspended-text">博多 ↔ 鹿兒島中央 全線（7/28終日）</span>
         </div>
         <div class="rail-detail-item">
-          <span class="rdi-label">再開預定</span>
-          <span class="rdi-val warn-text">未定（待安全確認）</span>
+          <span class="rdi-label">7/29 運行</span>
+          <span class="rdi-val suspended-text">始發起全線繼續停駛，設備點檢中（JR九州官方公告）</span>
         </div>
         <div class="rail-detail-item">
-          <span class="rdi-label">停駛原因</span>
-          <span class="rdi-val">熊本地震造成軌道設施需全面點檢</span>
+          <span class="rdi-label">再開時間</span>
+          <span class="rdi-val warn-text">未定（安全確認完了後お知らせ）</span>
         </div>
       </div>
       <div class="rail-stations">
@@ -164,16 +164,16 @@
       </div>
       <div class="rail-detail-grid">
         <div class="rail-detail-item">
-          <span class="rdi-label">停駛區間</span>
-          <span class="rdi-val suspended-text">熊本 ↔ 鹿兒島中央（受地震直接影響區間）</span>
+          <span class="rdi-label">終日運休區間</span>
+          <span class="rdi-val suspended-text">大牟田 ↔ 八代 全線（JR九州公告）</span>
         </div>
         <div class="rail-detail-item">
-          <span class="rdi-label">北部（博多↔熊本）</span>
-          <span class="rdi-val warn-text">安全確認中，暫停運行</span>
+          <span class="rdi-label">北部（博多↔大牟田）</span>
+          <span class="rdi-val warn-text">安全確認後、順次再開の見込み</span>
         </div>
         <div class="rail-detail-item">
           <span class="rdi-label">再開預定</span>
-          <span class="rdi-val warn-text">未定</span>
+          <span class="rdi-val warn-text">未定（7/29も引き続き運休）</span>
         </div>
       </div>
       <a href="https://www.jrkyushu.co.jp/railway/index.html" target="_blank" rel="noopener" class="official-link">JR九州 官方運行情報 →</a>
@@ -191,18 +191,66 @@
       </div>
       <div class="rail-detail-grid">
         <div class="rail-detail-item">
-          <span class="rdi-label">停駛區間</span>
-          <span class="rdi-val suspended-text">熊本 ↔ 大分 全線（經過震央附近）</span>
+          <span class="rdi-label">終日運休</span>
+          <span class="rdi-val suspended-text">熊本 ↔ 肥後大津、肥後大津 ↔ 宮地（JR九州公告）</span>
+        </div>
+        <div class="rail-detail-item">
+          <span class="rdi-label">宮地以東</span>
+          <span class="rdi-val warn-text">運行状況確認中</span>
         </div>
         <div class="rail-detail-item">
           <span class="rdi-label">影響</span>
-          <span class="rdi-val">阿蘇地區陸路交通嚴重中斷</span>
+          <span class="rdi-val">阿蘇地區鐵路交通全面中斷，7/29亦持續停駛</span>
         </div>
       </div>
       <a href="https://www.jrkyushu.co.jp/railway/index.html" target="_blank" rel="noopener" class="official-link">JR九州 官方運行情報 →</a>
     </div>
 
-    <!-- 熊本市電 -->
+    <!-- 三角線 -->
+    <div class="rail-card suspended">
+      <div class="rail-card-header">
+        <div class="rail-badge local-line">在來線</div>
+        <div class="rail-title-block">
+          <h3>長崎本線</h3>
+          <span class="rail-route">江北 ― 諸山 ― 諸渤 ― 諸漲 ― 諸山 ― 長崎</span>
+        </div>
+        <span class="rail-status-badge suspended-badge">⛔ 部分停駛</span>
+      </div>
+      <div class="rail-detail-grid">
+        <div class="rail-detail-item">
+          <span class="rdi-label">終日運休</span>
+          <span class="rdi-val suspended-text">江北 ↔ 諸漲 （JR九州公告）</span>
+        </div>
+        <div class="rail-detail-item">
+          <span class="rdi-label">諸漲以西</span>
+          <span class="rdi-val ok-text">正常運行</span>
+        </div>
+      </div>
+      <a href="https://www.jrkyushu.co.jp/railway/index.html" target="_blank" rel="noopener" class="official-link">JR九州 官方運行情報 →</a>
+    </div>
+
+    <!-- 三角線 -->
+    <div class="rail-card suspended">
+      <div class="rail-card-header">
+        <div class="rail-badge local-line">在來線</div>
+        <div class="rail-title-block">
+          <h3>三角線</h3>
+          <span class="rail-route">宇土 ― 三角</span>
+        </div>
+        <span class="rail-status-badge suspended-badge">⛔ 全線停駛</span>
+      </div>
+      <div class="rail-detail-grid">
+        <div class="rail-detail-item">
+          <span class="rdi-label">終日運休</span>
+          <span class="rdi-val suspended-text">宇土 ↔ 三角 全線（JR九州公告）</span>
+        </div>
+        <div class="rail-detail-item">
+          <span class="rdi-label">影響</span>
+          <span class="rdi-val">天草海隣單線，熊本市商港地區交通中斷</span>
+        </div>
+      </div>
+      <a href="https://www.jrkyushu.co.jp/railway/index.html" target="_blank" rel="noopener" class="official-link">JR九州 官方運行情報 →</a>
+    </div>
     <div class="rail-card warning-card">
       <div class="rail-card-header">
         <div class="rail-badge tram-badge">市電</div>
@@ -238,34 +286,42 @@
           <div class="road-item suspended-rd">
             <span class="rd-icon">🚧</span>
             <div>
-              <div class="rd-title">九州自動車道</div>
-              <div class="rd-desc">八代IC ↔ えびのIC 區間 — 緊急點檢中，暫時封閉</div>
+              <div class="rd-title">E3 九州自動車道</div>
+              <div class="rd-desc"><strong>植木IC ↔ えびのIC</strong> 上下線通行止め（NEXCO西日本 23:00時点）</div>
             </div>
             <span class="rd-badge suspended-badge-sm">封閉</span>
           </div>
           <div class="road-item suspended-rd">
             <span class="rd-icon">🚧</span>
             <div>
-              <div class="rd-title">南九州西回り自動車道</div>
-              <div class="rd-desc">宇土PA附近 — 路面損傷確認中</div>
+              <div class="rd-title">E3A 南九州西回り自動車道</div>
+              <div class="rd-desc"><strong>八代JCT ↔ 日奈久IC</strong> 上下線通行止め（NEXCO西日本公告）</div>
             </div>
             <span class="rd-badge suspended-badge-sm">封閉</span>
           </div>
-          <div class="road-item warning-rd">
-            <span class="rd-icon">⚠️</span>
+          <div class="road-item suspended-rd">
+            <span class="rd-icon">🚧</span>
             <div>
-              <div class="rd-title">九州自動車道（北部）</div>
-              <div class="rd-desc">博多IC ↔ 熊本IC — 低速通行，部分管制</div>
+              <div class="rd-title">E77 九州中央自動車道</div>
+              <div class="rd-desc"><strong>嘉島JCT ↔ 益城TB</strong> 通行止め（NEXCO西日本公告）</div>
             </div>
-            <span class="rd-badge warning-badge-sm">管制中</span>
+            <span class="rd-badge suspended-badge-sm">封閉</span>
           </div>
           <div class="road-item ok-rd">
             <span class="rd-icon">✅</span>
             <div>
-              <div class="rd-title">長崎自動車道・大分自動車道</div>
-              <div class="rd-desc">目前正常通行，注意餘震風險</div>
+              <div class="rd-title">E3 九州自動車道（南部）</div>
+              <div class="rd-desc"><strong>えびのIC ↔ 栗野IC</strong> 20:31 通行止め解除（NEXCO西日本公告）</div>
             </div>
-            <span class="rd-badge ok-badge-sm">正常</span>
+            <span class="rd-badge ok-badge-sm">解除</span>
+          </div>
+          <div class="road-item ok-rd">
+            <span class="rd-icon">✅</span>
+            <div>
+              <div class="rd-title">E10 宮崎自動車道</div>
+              <div class="rd-desc"><strong>えびのJCT ↔ 高原IC</strong> 20:31 通行止め解除（NEXCO西日本公告）</div>
+            </div>
+            <span class="rd-badge ok-badge-sm">解除</span>
           </div>
         </div>
         <a href="https://www.w-nexco.co.jp/" target="_blank" rel="noopener" class="official-link">NEXCO西日本 道路情報 →</a>
@@ -278,10 +334,9 @@
           <div class="road-item suspended-rd">
             <span class="rd-icon">🚌</span>
             <div>
-              <div class="rd-title">福岡（天神・博多）↔ 熊本</div>
+              <div class="rd-title">福岡（天神・博多）↔ 熊本「ひのくに号」</div>
               <div class="rd-desc">
-                停駛至 <strong>明日（7/29）中午12:00</strong><br>
-                下午能否恢復視道路安全確認結果而定
+                7/28（火）<strong>終日全便運休</strong>。7/29（水）<strong>午前中も全便運休</strong>、午後は運行見合わせ中。再開時に案内予定。（西鐵・九州産交公告）
               </div>
             </div>
             <span class="rd-badge suspended-badge-sm">停駛</span>
@@ -289,8 +344,8 @@
           <div class="road-item suspended-rd">
             <span class="rd-icon">🚌</span>
             <div>
-              <div class="rd-title">熊本 ↔ 鹿兒島</div>
-              <div class="rd-desc">受九州自動車道封閉影響，全日停駛，恢復時間未定</div>
+              <div class="rd-title">熊本 ↔ 宮崎・鹿兒島・延岡方向</div>
+              <div class="rd-desc">高速道路通行止えの影響により多くの便で運休・見合わせ、恢復時間未定（各バス会社公告）</div>
             </div>
             <span class="rd-badge suspended-badge-sm">停駛</span>
           </div>
@@ -298,7 +353,7 @@
             <span class="rd-icon">🚌</span>
             <div>
               <div class="rd-title">熊本 ↔ 大分・別府</div>
-              <div class="rd-desc">確認中，因豐肥本線停駛，預計代行巴士可能調整</div>
+              <div class="rd-desc">確認中，九州中央自動車道閉鎖影響，各社確認運行可否</div>
             </div>
             <span class="rd-badge warning-badge-sm">確認中</span>
           </div>
@@ -571,10 +626,11 @@
           </div>
         </div>
         <div class="airport-detail">
-          <div class="ap-row"><span class="ap-label">設施狀況</span><span class="ap-val suspended-text">跑道損傷檢驗中，尚未確認可否起降</span></div>
-          <div class="ap-row"><span class="ap-label">預計恢復</span><span class="ap-val warn-text">預定明日（7/29）評估恢復，視跑道檢驗結果而定</span></div>
+          <div class="ap-row"><span class="ap-label">跑道狀況</span><span class="ap-val ok-text">✅ <strong>19:00 已恢復運用</strong>（地震後暫時關閉，安全確認後再開）</span></div>
+          <div class="ap-row"><span class="ap-label">7/28航班</span><span class="ap-val suspended-text">計32便受影響（欠航27便，目的地変更等4便）</span></div>
+          <div class="ap-row"><span class="ap-label">7/29預定</span><span class="ap-val warn-text"><strong>13:00以降の便より通常運航予定</strong>（JAL等公告，視餘震狀況）</span></div>
           <div class="ap-row"><span class="ap-label">台灣航線</span><span class="ap-val">TPE（華航CI、星宇JX、虎航IT）、TXG（星宇JX）</span></div>
-          <div class="ap-row"><span class="ap-label">機場巴士</span><span class="ap-val suspended-text">暫停，待機場恢復後重啟</span></div>
+          <div class="ap-row"><span class="ap-label">機場巴士</span><span class="ap-val warn-text">視航班恢復狀況逐步重啟</span></div>
         </div>
         <a href="https://kumamoto-airport.co.jp/" target="_blank" rel="noopener" class="official-link">熊本機場官網 →</a>
       </div>
@@ -607,7 +663,7 @@
         <div class="airport-detail">
           <div class="ap-row"><span class="ap-label">設施狀況</span><span class="ap-val warn-text">設施安全確認中，目前暫緩起降</span></div>
           <div class="ap-row"><span class="ap-label">台灣航線</span><span class="ap-val">TPE（台灣虎航IT季節性）</span></div>
-          <div class="ap-row"><span class="ap-label">預計恢復</span><span class="ap-val warn-text">待官方公告</span></div>
+          <div class="eq-detail"><span class="eq-detail-label">震源深度</span><span class="eq-detail-value" id="mainEqDepth">約 16 km（JMA暫定値）</span></div>
         </div>
         <a href="https://www.pref.saga.lg.jp/kiji00399038/index.html" target="_blank" rel="noopener" class="official-link">佐賀機場資訊 →</a>
       </div>
@@ -659,9 +715,9 @@
           <p class="spot-desc">熊本城周邊，目前隨熊本城一同關閉，商店及餐廳均暫停營業。</p>
           <a href="https://www.sakuranobaba-johsaien.jp/" target="_blank" rel="noopener" class="spot-link">城彩苑官網 →</a>
         </div>
-        <div class="spot-card warning-spot">
-          <div class="spot-name-row"><span class="spot-name">熊本熊廣場</span><span class="spot-status-tag warning-tag">確認中</span></div>
-          <p class="spot-desc">位於熊本市中心，設施安全確認中，本日可能暫停開放。</p>
+        <div class="spot-card suspended-spot">
+          <div class="spot-name-row"><span class="spot-name">熊本熊廣場</span><span class="spot-status-tag suspended-tag">臨時閉館</span></div>
+          <p class="spot-desc">📢 <strong>官方公告：2026年7月28日 16:40以成臨時閉館</strong>。熊本熊隊の活動も一時中止。後続の活動については改めてお知らせ。（熊本県公式発表）</p>
           <a href="https://kumamon-square.jp/" target="_blank" rel="noopener" class="spot-link">熊本熊廣場官網 →</a>
         </div>
         <div class="spot-card warning-spot">
@@ -706,10 +762,10 @@
         <span class="area-name-big">⛩️ 高千穗</span>
       </div>
       <div class="spots-grid">
-        <div class="spot-card warning-spot">
-          <div class="spot-name-row"><span class="star-mark">★</span><span class="spot-name">高千穗峽</span><span class="spot-status-tag warning-tag">確認中</span></div>
-          <p class="spot-desc">溪谷地形，需確認岩石崩落情形。往高千穗峽的道路是否受損亦在確認中，划船活動暫停。</p>
-          <a href="https://takachiho-kanko.info/" target="_blank" rel="noopener" class="spot-link">高千穗觀光協會HP →</a>
+        <div class="spot-card suspended-spot">
+          <div class="spot-name-row"><span class="star-mark">★</span><span class="spot-name">高千穗峽</span><span class="spot-status-tag suspended-tag">貸船停止</span></div>
+          <p class="spot-desc">⚠ <strong>貸しボート：7月28日（火）〜7月31日（金）終日営業休止</strong>（高千穗觀光協會官方公告）。遊步道等立入も安全確認までは危険な状態。</p>
+          <a href="https://takachiho-kanko.info/" target="_blank" rel="noopener" class="spot-link">高千穗觀光協會HP（官方公告） →</a>
         </div>
         <div class="spot-card warning-spot">
           <div class="spot-name-row"><span class="spot-name">高千穗神社</span><span class="spot-status-tag warning-tag">確認中</span></div>
@@ -783,15 +839,15 @@
       </div>
       <div class="eq-qcard orange-qcard">
         <div class="eq-qcard-label">最大震度</div><div class="eq-qcard-val">7</div>
-        <div class="eq-qcard-sub">宇城市・氷川町</div>
+        <div class="eq-qcard-sub">約 16 km（JMA暫定値）</div>
       </div>
       <div class="eq-qcard blue-qcard">
         <div class="eq-qcard-label">震源深度</div><div class="eq-qcard-val">10km</div>
         <div class="eq-qcard-sub">熊本縣熊本地方</div>
       </div>
-      <div class="eq-qcard purple-qcard">
-        <div class="eq-qcard-label">海嘯警報</div><div class="eq-qcard-val" style="font-size:1.1rem">發布中</div>
-        <div class="eq-qcard-sub">有明海・八代海</div>
+      <div class="eq-qcard" style="background:rgba(0,230,118,0.08);border-color:rgba(0,230,118,0.28)">
+        <div class="eq-qcard-label">海嘯注意報</div><div class="eq-qcard-val" style="font-size:1rem;color:var(--green)">18:10解除</div>
+        <div class="eq-qcard-sub">（JMA官方，已全部解除）</div>
       </div>
     </div>
 
