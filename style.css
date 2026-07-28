@@ -60,6 +60,26 @@ body { font-family:var(--font); background:var(--bg); color:var(--txt); min-heig
   letter-spacing: .02em;
 }
 .disclaimer-icon { font-size: 1rem; }
+.wish-badge {
+  background: linear-gradient(135deg, rgba(255,136,0,0.4), rgba(255,45,61,0.4));
+  border: 1px solid rgba(255,255,255,0.4);
+  padding: .15rem .6rem;
+  border-radius: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-left: .4rem;
+  font-size: .8rem;
+  letter-spacing: .03em;
+  display: inline-flex;
+  align-items: center;
+  gap: .2rem;
+  box-shadow: 0 0 12px rgba(255,136,0,0.3);
+}
+.wish-sub-text {
+  color: #ff8800;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(255,136,0,0.4);
+}
 
 .header-inner { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.8rem 1.8rem; flex-wrap:wrap; }
 
