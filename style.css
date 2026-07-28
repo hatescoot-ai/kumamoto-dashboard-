@@ -1,0 +1,446 @@
+/* ============================================================
+   熊本地震即時資訊總覽 v2 — style.css
+   ============================================================ */
+
+/* --- Variables --- */
+:root {
+  --bg:         #090b12;
+  --bg-card:    rgba(14,18,32,0.88);
+  --bg-card-h:  rgba(20,26,46,0.96);
+  --glass:      rgba(255,255,255,0.03);
+  --border:     rgba(255,255,255,0.07);
+
+  --red:        #ff2d3d;
+  --red-glow:   rgba(255,45,61,0.32);
+  --orange:     #ff8800;
+  --orange-g:   rgba(255,136,0,0.28);
+  --yellow:     #ffd000;
+  --green:      #00e676;
+  --green-g:    rgba(0,230,118,0.22);
+  --blue:       #0088ff;
+  --blue-g:     rgba(0,136,255,0.28);
+  --purple:     #9c27ff;
+
+  --txt:        #eef0ff;
+  --txt2:       rgba(238,240,255,0.62);
+  --txt3:       rgba(238,240,255,0.32);
+
+  --font: 'Noto Sans TC','Inter',system-ui,sans-serif;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  --ease: 0.2s cubic-bezier(0.4,0,0.2,1);
+  --shadow: 0 8px 32px rgba(0,0,0,0.5), 0 1px 0 var(--border) inset;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { font-size:16px; scroll-behavior:smooth; }
+body { font-family:var(--font); background:var(--bg); color:var(--txt); min-height:100vh; overflow-x:hidden; line-height:1.6; }
+
+/* Canvas */
+#bgCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.45; }
+
+/* ===== HEADER ===== */
+.site-header {
+  position:sticky; top:0; z-index:200;
+  background:rgba(9,11,18,0.92);
+  backdrop-filter:blur(22px);
+  border-bottom:1px solid rgba(255,45,61,0.22);
+  box-shadow:0 4px 24px rgba(255,45,61,0.12);
+}
+.header-inner { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.8rem 1.8rem; flex-wrap:wrap; }
+
+.header-left { display:flex; align-items:center; gap:1rem; }
+.alert-badge.pulse-ring {
+  width:48px; height:48px; border-radius:50%;
+  background:linear-gradient(135deg,#ff2d3d,#ff6600);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem;
+  animation:pulseRing 1.8s ease-in-out infinite;
+  flex-shrink:0;
+}
+@keyframes pulseRing {
+  0%,100% { box-shadow:0 0 0 0 rgba(255,45,61,0.6); }
+  50%      { box-shadow:0 0 0 12px rgba(255,45,61,0); }
+}
+h1 { font-size:1.6rem; font-weight:900; letter-spacing:-.02em; line-height:1.1; }
+.highlight { background:linear-gradient(90deg,#ff2d3d,#ff8800); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.header-sub { font-size:.68rem; color:var(--txt3); letter-spacing:.07em; margin-top:2px; }
+
+.header-right { display:flex; align-items:center; gap:.9rem; flex-wrap:wrap; }
+.mag-box {
+  display:flex; flex-direction:column; align-items:center;
+  background:rgba(255,45,61,0.12); border:1px solid rgba(255,45,61,0.35);
+  border-radius:var(--r-md); padding:.5rem .9rem;
+}
+.mag-box.orange { background:rgba(255,136,0,0.12); border-color:rgba(255,136,0,0.35); }
+.box-label { font-size:.6rem; color:var(--txt3); letter-spacing:.1em; }
+.box-val { font-size:2.2rem; font-weight:900; line-height:1; }
+.box-val.red { color:var(--red); text-shadow:0 0 18px var(--red-glow); }
+.mag-box.orange .box-val { color:var(--orange); text-shadow:0 0 18px var(--orange-g); }
+.box-unit { font-size:.62rem; color:var(--txt3); }
+
+/* Timer */
+.timer-wrap { display:flex; flex-direction:column; align-items:center; gap:.35rem; }
+.timer-ring-wrap { position:relative; width:46px; height:46px; display:flex; align-items:center; justify-content:center; }
+.timer-svg { position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); }
+.timer-track { fill:none; stroke:rgba(255,255,255,0.09); stroke-width:2.5; }
+.timer-progress { fill:none; stroke:var(--blue); stroke-width:2.5; stroke-linecap:round; stroke-dasharray:100.5; transition:stroke-dashoffset 1s linear; }
+.timer-text { position:relative; z-index:1; font-size:.65rem; font-weight:700; color:var(--blue); font-variant-numeric:tabular-nums; }
+.timer-label { font-size:.58rem; color:var(--txt3); }
+.refresh-btn {
+  display:flex; align-items:center; gap:.35rem;
+  background:rgba(0,136,255,0.15); border:1px solid rgba(0,136,255,0.38);
+  border-radius:var(--r-sm); color:var(--blue); padding:.38rem .75rem;
+  font-size:.78rem; font-family:var(--font); cursor:pointer; transition:var(--ease);
+}
+.refresh-btn:hover { background:rgba(0,136,255,0.28); box-shadow:0 0 14px var(--blue-g); }
+.refresh-btn.loading { opacity:.65; pointer-events:none; }
+#refreshIcon { font-size:.95rem; }
+#refreshIcon.spin { display:inline-block; animation:spin .9s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* Status bar */
+.status-bar {
+  display:flex; gap:1.2rem; padding:.4rem 1.8rem;
+  background:rgba(0,0,0,0.18); border-top:1px solid var(--border);
+  overflow-x:auto; scrollbar-width:none; flex-wrap:wrap;
+}
+.status-bar::-webkit-scrollbar { display:none; }
+.sitem { display:flex; align-items:center; gap:.4rem; font-size:.74rem; color:var(--txt2); white-space:nowrap; }
+.sdot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.sdot.live   { background:var(--green); box-shadow:0 0 7px var(--green); animation:blink 1.3s infinite; }
+.sdot.warn   { background:var(--orange); box-shadow:0 0 7px var(--orange); }
+.sdot.danger { background:var(--red); box-shadow:0 0 7px var(--red); animation:blink 1s infinite; }
+.sdot.ok     { background:var(--green); box-shadow:0 0 7px var(--green); }
+.sdot.purple { background:var(--purple); box-shadow:0 0 7px var(--purple); }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+/* Main Nav Tabs */
+.main-nav {
+  display:flex; gap:0; border-top:1px solid var(--border);
+  background:rgba(0,0,0,0.2); overflow-x:auto; scrollbar-width:none;
+}
+.main-nav::-webkit-scrollbar { display:none; }
+.nav-tab {
+  flex:1; min-width:120px; padding:.65rem 1rem;
+  background:transparent; border:none; border-right:1px solid var(--border);
+  color:var(--txt3); font-size:.82rem; font-family:var(--font); cursor:pointer;
+  transition:var(--ease); white-space:nowrap;
+}
+.nav-tab:last-child { border-right:none; }
+.nav-tab:hover { color:var(--txt); background:rgba(255,255,255,0.04); }
+.nav-tab.active { color:var(--blue); background:rgba(0,136,255,0.1); border-bottom:2px solid var(--blue); font-weight:700; }
+
+/* ===== MAIN ===== */
+.main-content { position:relative; z-index:1; padding:1.5rem 1.8rem; max-width:1400px; margin:0 auto; }
+
+/* Section visibility */
+.info-section { display:none; }
+.info-section.active { display:block; animation:fadeIn .3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+/* Sub-section */
+.sub-section { margin-bottom:2rem; }
+.sub-header { display:flex; align-items:center; gap:.7rem; margin-bottom:1.1rem; padding-bottom:.7rem; border-bottom:1px solid var(--border); }
+.sub-icon { font-size:1.3rem; }
+.sub-header h2 { font-size:1.15rem; font-weight:800; }
+.sub-note { font-size:.78rem; color:var(--txt3); margin-bottom:.9rem; }
+
+/* ===== RAIL CARDS ===== */
+.rail-card {
+  background:var(--bg-card); border:1px solid var(--border);
+  border-radius:var(--r-lg); padding:1.2rem 1.4rem;
+  margin-bottom:1rem; transition:var(--ease);
+}
+.rail-card:hover { background:var(--bg-card-h); transform:translateY(-1px); }
+.rail-card.suspended { border-color:rgba(255,45,61,0.25); box-shadow:0 4px 20px rgba(255,45,61,0.08); }
+.rail-card.recovered { border-color:rgba(0,230,118,0.25); box-shadow:0 4px 20px rgba(0,230,118,0.08); }
+.rail-card.warning-card { border-color:rgba(255,136,0,0.25); }
+
+.rail-card-header { display:flex; align-items:flex-start; gap:.9rem; margin-bottom:.9rem; flex-wrap:wrap; }
+.rail-badge {
+  font-size:.64rem; font-weight:800; padding:.25rem .55rem; border-radius:6px;
+  letter-spacing:.06em; flex-shrink:0; margin-top:2px;
+}
+.shinkansen { background:linear-gradient(135deg,#0055cc,#003399); color:#fff; }
+.shinkansen.west { background:linear-gradient(135deg,#006644,#003322); }
+.local-line { background:linear-gradient(135deg,#444,#222); color:#fff; }
+.tram-badge { background:linear-gradient(135deg,#006633,#004422); color:#fff; }
+
+.rail-title-block { flex:1; }
+.rail-title-block h3 { font-size:.98rem; font-weight:800; margin-bottom:.2rem; }
+.rail-route { font-size:.72rem; color:var(--txt3); }
+.rail-status-badge { font-size:.72rem; font-weight:700; padding:.22rem .6rem; border-radius:20px; flex-shrink:0; }
+.suspended-badge { background:rgba(255,45,61,0.18); color:var(--red); border:1px solid rgba(255,45,61,0.35); }
+.recovered-badge { background:rgba(0,230,118,0.15); color:var(--green); border:1px solid rgba(0,230,118,0.3); }
+.warning-badge-sm { background:rgba(255,136,0,0.18); color:var(--orange); border:1px solid rgba(255,136,0,0.35); }
+
+.rail-detail-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:.5rem; margin-bottom:.9rem; }
+.rail-detail-item { display:flex; flex-direction:column; gap:.15rem; background:rgba(255,255,255,0.025); border-radius:var(--r-sm); padding:.5rem .7rem; }
+.rdi-label { font-size:.65rem; color:var(--txt3); font-weight:600; letter-spacing:.06em; }
+.rdi-val { font-size:.82rem; font-weight:600; }
+.suspended-text { color:var(--red); }
+.warn-text { color:var(--orange); }
+.ok-text { color:var(--green); }
+
+/* Station row */
+.rail-stations { margin:0 0 .8rem; overflow-x:auto; }
+.station-row { display:flex; align-items:center; gap:.15rem; white-space:nowrap; padding:.4rem 0; font-size:.75rem; }
+.station { padding:.25rem .55rem; border-radius:20px; font-weight:700; border:1px solid; flex-shrink:0; }
+.suspended-st { background:rgba(255,45,61,0.12); border-color:rgba(255,45,61,0.3); color:var(--red); }
+.ok-st { background:rgba(0,230,118,0.1); border-color:rgba(0,230,118,0.3); color:var(--green); }
+.st-line { color:var(--txt3); letter-spacing:-.1em; flex-shrink:0; }
+.suspended-line { color:rgba(255,45,61,0.4); }
+.ok-line { color:rgba(0,230,118,0.4); }
+
+.official-link { display:inline-block; font-size:.74rem; color:var(--blue); text-decoration:none; margin-top:.3rem; }
+.official-link:hover { text-decoration:underline; }
+
+/* ===== ROAD / BUS ===== */
+.road-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:1.2rem; }
+.road-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-lg); padding:1.2rem 1.4rem; }
+.road-card-title { font-size:.9rem; font-weight:800; margin-bottom:.8rem; color:var(--txt); }
+.road-list { display:flex; flex-direction:column; gap:.6rem; margin-bottom:.8rem; }
+.road-item {
+  display:flex; align-items:flex-start; gap:.7rem;
+  padding:.6rem .8rem; border-radius:var(--r-md); border:1px solid;
+}
+.suspended-rd { background:rgba(255,45,61,0.07); border-color:rgba(255,45,61,0.18); }
+.warning-rd   { background:rgba(255,136,0,0.07); border-color:rgba(255,136,0,0.18); }
+.ok-rd        { background:rgba(0,230,118,0.05); border-color:rgba(0,230,118,0.18); }
+.rd-icon { font-size:1.1rem; flex-shrink:0; margin-top:2px; }
+.rd-title { font-size:.84rem; font-weight:700; margin-bottom:.15rem; }
+.rd-desc { font-size:.76rem; color:var(--txt2); line-height:1.5; }
+.rd-badge { font-size:.66rem; font-weight:700; padding:.18rem .48rem; border-radius:20px; flex-shrink:0; margin-left:auto; white-space:nowrap; align-self:flex-start; }
+.suspended-badge-sm { background:rgba(255,45,61,0.18); color:var(--red); border:1px solid rgba(255,45,61,0.3); }
+.warning-badge-sm   { background:rgba(255,136,0,0.18); color:var(--orange); border:1px solid rgba(255,136,0,0.3); }
+.ok-badge-sm        { background:rgba(0,230,118,0.14); color:var(--green); border:1px solid rgba(0,230,118,0.28); }
+
+.road-note { font-size:.74rem; color:var(--orange); margin-bottom:.6rem; padding:.4rem .6rem; background:rgba(255,136,0,0.07); border-left:3px solid var(--orange); border-radius:2px; }
+.bus-links { display:flex; gap:.6rem; flex-wrap:wrap; }
+.bus-link { font-size:.74rem; color:var(--blue); text-decoration:none; padding:.25rem .55rem; border:1px solid rgba(0,136,255,0.3); border-radius:20px; }
+.bus-link:hover { background:rgba(0,136,255,0.12); }
+
+/* ===== SPOT TRANSPORT ===== */
+.spot-transport-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:1rem; }
+.spot-transport-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-md); padding:1rem; }
+.spt-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:.7rem; }
+.spt-area-badge { font-size:.72rem; font-weight:700; padding:.2rem .55rem; border-radius:6px; color:#fff; }
+.kumamoto-badge { background:linear-gradient(135deg,#8b0000,#cc0000); }
+.aso-badge      { background:linear-gradient(135deg,#994400,#cc6600); }
+.takachiho-badge{ background:linear-gradient(135deg,#553399,#7733aa); }
+.beppu-badge    { background:linear-gradient(135deg,#003366,#0055aa); }
+.spt-status { font-size:.74rem; font-weight:600; }
+.spt-list { list-style:none; display:flex; flex-direction:column; gap:.35rem; font-size:.78rem; color:var(--txt2); }
+.spt-icon { margin-right:.4rem; font-weight:700; }
+
+/* ===== AIRLINE CARDS ===== */
+.airline-section-grid { display:flex; flex-direction:column; gap:1.4rem; }
+.airline-full-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-lg); padding:1.3rem 1.5rem; }
+.airline-full-card.ci-card { border-color:rgba(0,55,136,0.35); }
+.airline-full-card.br-card { border-color:rgba(0,100,50,0.35); }
+.airline-full-card.jx-card { border-color:rgba(80,0,180,0.35); }
+.airline-full-card.it-card { border-color:rgba(200,80,0,0.35); }
+
+.airline-full-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:.5rem; }
+.airline-name-link { display:flex; align-items:center; gap:.6rem; text-decoration:none; font-size:1rem; font-weight:800; transition:var(--ease); }
+.airline-name-link:hover { opacity:.8; }
+.ci-name { color:#4488ff; } .br-name { color:#00c060; } .jx-name { color:#b060ff; } .it-name { color:#ff8833; }
+.airline-logo-text {
+  width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+  font-size:.8rem; font-weight:900; color:#fff;
+}
+.airline-full-card.ci-card .airline-logo-text { background:linear-gradient(135deg,#003388,#0055cc); }
+.br-logo { background:linear-gradient(135deg,#004d26,#00863e) !important; }
+.jx-logo { background:linear-gradient(135deg,#2a0060,#7700ff) !important; }
+.it-logo { background:linear-gradient(135deg,#993300,#ff6600) !important; }
+.airline-overall-status { font-size:.72rem; font-weight:700; padding:.22rem .6rem; border-radius:20px; }
+.status-warn   { background:rgba(255,136,0,0.18); color:var(--orange); border:1px solid rgba(255,136,0,0.35); }
+.status-danger { background:rgba(255,45,61,0.18); color:var(--red); border:1px solid rgba(255,45,61,0.35); }
+.status-ok     { background:rgba(0,230,118,0.14); color:var(--green); border:1px solid rgba(0,230,118,0.28); }
+
+/* Refund policy */
+.refund-policy-box { border-radius:var(--r-md); padding:.9rem 1.1rem; margin-bottom:1rem; border:1px solid; }
+.ci-policy { background:rgba(0,55,136,0.1); border-color:rgba(0,55,136,0.25); }
+.br-policy { background:rgba(0,100,50,0.1); border-color:rgba(0,100,50,0.25); }
+.jx-policy { background:rgba(80,0,180,0.1); border-color:rgba(80,0,180,0.25); }
+.it-policy { background:rgba(200,80,0,0.1); border-color:rgba(200,80,0,0.25); }
+.policy-title { font-size:.78rem; font-weight:700; margin-bottom:.5rem; color:var(--txt); }
+.refund-policy-box p { font-size:.8rem; color:var(--txt2); margin-bottom:.4rem; }
+.policy-list { list-style:none; display:flex; flex-direction:column; gap:.3rem; margin:.3rem 0 .5rem 0; }
+.policy-list li { font-size:.78rem; color:var(--txt2); padding-left:1rem; position:relative; }
+.policy-list li::before { content:'›'; position:absolute; left:0; color:var(--blue); }
+.policy-link { display:inline-block; font-size:.75rem; color:var(--blue); text-decoration:none; }
+.policy-link:hover { text-decoration:underline; }
+
+/* Airline flight table */
+.flight-rows-container { margin-bottom:.9rem; overflow-x:auto; border-radius:var(--r-md); border:1px solid var(--border); }
+.airline-flight-table { width:100%; border-collapse:collapse; font-size:.8rem; min-width:480px; }
+.airline-flight-table th { background:rgba(255,255,255,0.04); padding:.55rem .9rem; text-align:left; font-size:.68rem; font-weight:600; color:var(--txt3); letter-spacing:.07em; border-bottom:1px solid var(--border); }
+.airline-flight-table td { padding:.55rem .9rem; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--txt2); }
+.airline-flight-table tr:last-child td { border-bottom:none; }
+.airline-flight-table tr:hover td { background:rgba(255,255,255,0.025); }
+.fs-tag { font-size:.68rem; font-weight:700; padding:.15rem .5rem; border-radius:20px; display:inline-block; }
+.fs-cancelled { background:rgba(255,45,61,0.18); color:var(--red); border:1px solid rgba(255,45,61,0.28); }
+.fs-delayed   { background:rgba(255,136,0,0.18); color:var(--orange); border:1px solid rgba(255,136,0,0.28); }
+.fs-normal    { background:rgba(0,230,118,0.12); color:var(--green); border:1px solid rgba(0,230,118,0.25); }
+.fs-unknown   { background:rgba(255,255,255,0.07); color:var(--txt3); border:1px solid var(--border); }
+.update-ts    { font-size:.68rem; color:var(--txt3); font-variant-numeric:tabular-nums; }
+
+/* Update history */
+.update-history { background:rgba(255,255,255,0.025); border-radius:var(--r-md); padding:.8rem 1rem; border:1px solid var(--border); }
+.history-title { font-size:.72rem; font-weight:700; color:var(--txt3); margin-bottom:.5rem; letter-spacing:.06em; }
+.history-list { display:flex; flex-direction:column; gap:.4rem; max-height:160px; overflow-y:auto; }
+.history-list::-webkit-scrollbar { width:4px; } .history-list::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:2px; }
+.history-item { display:flex; gap:.6rem; font-size:.75rem; }
+.hist-time { color:var(--blue); flex-shrink:0; font-variant-numeric:tabular-nums; font-weight:600; }
+.hist-content { color:var(--txt2); line-height:1.5; }
+
+/* ===== AIRPORTS ===== */
+.airport-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:1.1rem; }
+.airport-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-lg); padding:1.2rem 1.4rem; }
+.suspended-airport { border-color:rgba(255,45,61,0.28); }
+.ok-airport        { border-color:rgba(0,230,118,0.22); }
+.warning-airport   { border-color:rgba(255,136,0,0.22); }
+.airport-header { display:flex; align-items:center; gap:.9rem; margin-bottom:.8rem; }
+.airport-iata { font-size:1.6rem; font-weight:900; font-family:'Inter',monospace; color:var(--red); min-width:52px; }
+.ok-iata  { color:var(--green); }
+.warn-iata{ color:var(--orange); }
+.airport-name { font-size:.9rem; font-weight:700; margin-bottom:.25rem; }
+.ap-badge { font-size:.68rem; font-weight:700; padding:.18rem .5rem; border-radius:20px; }
+.ok-badge-ap { background:rgba(0,230,118,0.14); color:var(--green); border:1px solid rgba(0,230,118,0.28); }
+.airport-detail { display:flex; flex-direction:column; gap:.4rem; margin-bottom:.7rem; }
+.ap-row { display:flex; gap:.5rem; }
+.ap-label { font-size:.68rem; color:var(--txt3); flex-shrink:0; width:72px; padding-top:.1rem; }
+.ap-val { font-size:.78rem; color:var(--txt2); line-height:1.5; }
+
+/* ===== SPOT CARDS ===== */
+.spot-area-block { margin-bottom:1.8rem; }
+.spot-area-header { padding:.65rem 1rem; border-radius:var(--r-md) var(--r-md) 0 0; margin-bottom:.8rem; border-bottom:3px solid; }
+.kumamoto-area { background:rgba(139,0,0,0.18); border-color:#8b0000; }
+.aso-area      { background:rgba(153,68,0,0.18); border-color:#994400; }
+.takachiho-area{ background:rgba(85,51,153,0.18); border-color:#553399; }
+.beppu-area    { background:rgba(0,51,102,0.18); border-color:#003366; }
+.area-name-big { font-size:1rem; font-weight:900; }
+
+.spots-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:.9rem; }
+.spot-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-md); padding:1rem; transition:var(--ease); }
+.spot-card:hover { background:var(--bg-card-h); transform:translateY(-2px); }
+.suspended-spot { border-color:rgba(255,45,61,0.2); }
+.warning-spot   { border-color:rgba(255,136,0,0.2); }
+.ok-spot        { border-color:rgba(0,230,118,0.18); }
+
+.spot-name-row { display:flex; align-items:center; gap:.5rem; margin-bottom:.5rem; flex-wrap:wrap; }
+.star-mark { color:var(--yellow); font-size:1rem; flex-shrink:0; }
+.spot-name { font-size:.9rem; font-weight:800; flex:1; }
+.spot-status-tag { font-size:.65rem; font-weight:700; padding:.15rem .5rem; border-radius:20px; flex-shrink:0; }
+.suspended-tag { background:rgba(255,45,61,0.18); color:var(--red); border:1px solid rgba(255,45,61,0.3); }
+.warning-tag   { background:rgba(255,136,0,0.18); color:var(--orange); border:1px solid rgba(255,136,0,0.3); }
+.ok-tag        { background:rgba(0,230,118,0.14); color:var(--green); border:1px solid rgba(0,230,118,0.28); }
+.spot-desc { font-size:.76rem; color:var(--txt2); line-height:1.55; margin-bottom:.5rem; }
+.spot-link { font-size:.72rem; color:var(--blue); text-decoration:none; }
+.spot-link:hover { text-decoration:underline; }
+
+/* ===== EQ SECTION ===== */
+.eq-quick-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:.9rem; margin-bottom:1.2rem; }
+.eq-qcard { border-radius:var(--r-md); padding:.9rem 1rem; border:1px solid; text-align:center; }
+.red-qcard    { background:rgba(255,45,61,0.12); border-color:rgba(255,45,61,0.3); }
+.orange-qcard { background:rgba(255,136,0,0.12); border-color:rgba(255,136,0,0.3); }
+.blue-qcard   { background:rgba(0,136,255,0.1); border-color:rgba(0,136,255,0.28); }
+.purple-qcard { background:rgba(156,39,255,0.1); border-color:rgba(156,39,255,0.28); }
+.eq-qcard-label { font-size:.65rem; color:var(--txt3); margin-bottom:.2rem; }
+.eq-qcard-val { font-size:2rem; font-weight:900; line-height:1.1; }
+.red-qcard .eq-qcard-val    { color:var(--red); }
+.orange-qcard .eq-qcard-val { color:var(--orange); }
+.blue-qcard .eq-qcard-val   { color:var(--blue); }
+.purple-qcard .eq-qcard-val { color:var(--purple); }
+.eq-qcard-sub { font-size:.68rem; color:var(--txt3); margin-top:.2rem; }
+
+/* USGS table */
+.feed-title { font-size:.9rem; font-weight:700; color:var(--txt2); display:flex; align-items:center; gap:.4rem; }
+.loading-indicator { display:inline-block; width:11px; height:11px; border:2px solid rgba(255,255,255,0.12); border-top-color:var(--blue); border-radius:50%; animation:spin .8s linear infinite; opacity:0; }
+.loading-indicator.active { opacity:1; }
+.usgs-table-wrapper { overflow-x:auto; border-radius:var(--r-md); border:1px solid var(--border); margin-top:.5rem; }
+.usgs-table { width:100%; border-collapse:collapse; font-size:.8rem; min-width:440px; }
+.usgs-table th { background:rgba(255,255,255,0.04); padding:.6rem .9rem; text-align:left; font-size:.66rem; font-weight:600; color:var(--txt3); letter-spacing:.08em; border-bottom:1px solid var(--border); }
+.usgs-table td { padding:.58rem .9rem; border-bottom:1px solid rgba(255,255,255,0.035); color:var(--txt2); }
+.usgs-table tr:last-child td { border-bottom:none; }
+.usgs-table .mag-high { color:var(--red); font-weight:700; }
+.usgs-table .mag-mid  { color:var(--orange); font-weight:700; }
+.usgs-table .mag-low  { color:var(--yellow); font-weight:600; }
+.loading-text { text-align:center; color:var(--txt3); padding:1.5rem; }
+
+/* News feed */
+.news-feed { display:flex; flex-direction:column; gap:.65rem; }
+.news-item { display:block; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-md); padding:.85rem 1rem; text-decoration:none; color:inherit; transition:var(--ease); }
+.news-item:hover { background:var(--bg-card-h); transform:translateX(3px); border-left:3px solid var(--blue); }
+.news-item-header { display:flex; justify-content:space-between; align-items:flex-start; gap:.8rem; margin-bottom:.25rem; }
+.news-item-title { font-size:.85rem; font-weight:600; line-height:1.4; }
+.news-item-time { font-size:.67rem; color:var(--txt3); flex-shrink:0; }
+.news-item-source { font-size:.67rem; color:var(--txt3); }
+.news-item-summary { font-size:.76rem; color:var(--txt2); line-height:1.5; margin-top:.25rem; }
+.news-tag { display:inline-block; font-size:.6rem; font-weight:700; padding:.12rem .42rem; border-radius:20px; margin-right:.25rem; }
+.tag-eq      { background:rgba(255,45,61,0.18); color:var(--red); }
+.tag-transport{ background:rgba(255,136,0,0.18); color:var(--orange); }
+.tag-flight  { background:rgba(0,136,255,0.18); color:var(--blue); }
+.tag-official{ background:rgba(0,230,118,0.12); color:var(--green); }
+.news-skeleton { height:68px; border-radius:var(--r-md); border:1px solid var(--border); background:linear-gradient(90deg,rgba(255,255,255,0.03) 25%,rgba(255,255,255,0.07) 50%,rgba(255,255,255,0.03) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* ===== FEEDBACK ===== */
+.feedback-section {
+  position:relative; z-index:1;
+  background:rgba(0,136,255,0.04); border-top:1px solid rgba(0,136,255,0.15);
+  padding:1.8rem 1.8rem; margin-top:1rem;
+}
+.feedback-inner { max-width:700px; margin:0 auto; }
+.feedback-header { display:flex; align-items:center; gap:.8rem; margin-bottom:1.2rem; flex-wrap:wrap; }
+.feedback-icon { font-size:1.6rem; }
+.feedback-title { font-size:1.1rem; font-weight:800; }
+.feedback-sub { font-size:.78rem; color:var(--txt3); flex:1; min-width:180px; }
+.feedback-form-wrap { display:flex; gap:.8rem; flex-wrap:wrap; margin-bottom:.6rem; }
+.feedback-fields { flex:1; display:flex; flex-direction:column; gap:.6rem; min-width:220px; }
+.feedback-input, .feedback-textarea {
+  width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(0,136,255,0.25);
+  border-radius:var(--r-sm); color:var(--txt); font-family:var(--font); font-size:.82rem;
+  padding:.55rem .8rem; transition:var(--ease); resize:vertical;
+}
+.feedback-input:focus, .feedback-textarea:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(0,136,255,0.12); }
+.feedback-send-btn {
+  align-self:flex-end; padding:.75rem 1.4rem;
+  background:linear-gradient(135deg,rgba(0,136,255,0.25),rgba(0,136,255,0.12));
+  border:1px solid rgba(0,136,255,0.4); border-radius:var(--r-md);
+  color:var(--blue); font-family:var(--font); font-size:.85rem; font-weight:700;
+  cursor:pointer; transition:var(--ease); display:flex; align-items:center; gap:.5rem; white-space:nowrap;
+}
+.feedback-send-btn:hover { background:rgba(0,136,255,0.3); box-shadow:0 0 16px var(--blue-g); transform:translateY(-1px); }
+.feedback-note { font-size:.7rem; color:var(--txt3); }
+
+/* ===== FOOTER ===== */
+.site-footer { position:relative; z-index:1; background:rgba(0,0,0,0.4); border-top:1px solid var(--border); padding:1.2rem 1.8rem; }
+.footer-inner { max-width:1400px; margin:0 auto; display:flex; gap:1.5rem; flex-wrap:wrap; align-items:flex-start; }
+.footer-sources h4 { font-size:.68rem; color:var(--txt3); margin-bottom:.5rem; text-transform:uppercase; letter-spacing:.08em; }
+.source-links { display:flex; flex-wrap:wrap; gap:.5rem; }
+.source-links a { font-size:.72rem; color:var(--blue); text-decoration:none; }
+.source-links a:hover { text-decoration:underline; }
+.footer-notice { flex:1; min-width:240px; }
+.footer-notice p { font-size:.7rem; color:var(--txt3); line-height:1.6; }
+.footer-update { color:rgba(255,255,255,0.25); margin-top:.25rem; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:rgba(255,255,255,0.02); }
+::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:3px; }
+
+/* Responsive */
+@media(max-width:768px) {
+  .header-inner { padding:.7rem 1rem; }
+  h1 { font-size:1.2rem; }
+  .box-val { font-size:1.6rem; }
+  .main-content { padding:1rem; }
+  .nav-tab { font-size:.74rem; padding:.55rem .7rem; }
+  .feedback-section { padding:1.2rem 1rem; }
+}
+@media(max-width:480px) {
+  .eq-quick-cards { grid-template-columns:1fr 1fr; }
+  .airport-grid { grid-template-columns:1fr; }
+}

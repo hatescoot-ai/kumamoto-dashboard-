@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="description" content="熊本地震即時資訊總覽 - 鐵公路交通、景點、台灣航班、每5分鐘更新"/>
+  <meta property="og:title" content="熊本地震·即時資訊總覽"/>
+  <meta property="og:description" content="熊本M7.1強震 · JR交通 · 景點狀況 · 台灣航班 · 每5分鐘自動更新"/>
+  <title>熊本地震·即時資訊總覽</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+
+<!-- ===== HEADER ===== -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="alert-badge pulse-ring"><span>⚠</span></div>
+      <div class="header-title">
+        <h1>熊本地震 <span class="highlight">即時資訊</span></h1>
+        <p class="header-sub">Kumamoto M7.1 · 2026-07-28 · 每5分鐘自動更新</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="mag-box"><span class="box-label">規模</span><span class="box-val red">7.1</span><span class="box-unit">M</span></div>
+      <div class="mag-box orange"><span class="box-label">最大震度</span><span class="box-val">7</span></div>
+      <div class="timer-wrap">
+        <div class="timer-ring-wrap">
+          <svg viewBox="0 0 40 40" class="timer-svg">
+            <circle cx="20" cy="20" r="16" class="timer-track"/>
+            <circle cx="20" cy="20" r="16" class="timer-progress" id="timerProgress"/>
+          </svg>
+          <span class="timer-text" id="timerText">05:00</span>
+        </div>
+        <span class="timer-label">下次更新</span>
+        <button class="refresh-btn" id="refreshBtn" onclick="fetchAllData()">
+          <span id="refreshIcon">&#8635;</span> 立即更新
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="status-bar">
+    <div class="sitem"><span class="sdot live"></span><span id="lastUpdateText">載入中...</span></div>
+    <div class="sitem"><span class="sdot warn"></span><span>海嘯警報：有明海・八代海</span></div>
+    <div class="sitem"><span class="sdot danger"></span><span>九州新幹線全線停擺</span></div>
+    <div class="sitem"><span class="sdot ok"></span><span>西九州新幹線 17:55 已再開</span></div>
+    <div class="sitem"><span class="sdot purple"></span><span>外交部緊急：0800-085-095</span></div>
+  </div>
+  <!-- NAV TABS -->
+  <nav class="main-nav">
+    <button class="nav-tab active" onclick="showSection('sec-transport')" id="navt-transport">🚄 鐵公路交通</button>
+    <button class="nav-tab" onclick="showSection('sec-flights')" id="navt-flights">✈️ 台灣航班</button>
+    <button class="nav-tab" onclick="showSection('sec-spots')" id="navt-spots">🏯 熊本景點</button>
+    <button class="nav-tab" onclick="showSection('sec-eq')" id="navt-eq">🔴 地震資訊</button>
+  </nav>
+</header>
+
+<main class="main-content">
+
+<!-- ===================================================
+     SECTION 1: 鐵公路交通
+     =================================================== -->
+<section class="info-section active" id="sec-transport">
+
+  <!-- 1-1 鐵路 -->
+  <div class="sub-section">
+    <div class="sub-header"><span class="sub-icon">🚄</span><h2>鐵路營運狀況</h2></div>
+
+    <!-- 九州新幹線 -->
+    <div class="rail-card suspended">
+      <div class="rail-card-header">
+        <div class="rail-badge shinkansen">新幹線</div>
+        <div class="rail-title-block">
+          <h3>九州新幹線（みずほ・さくら・つばめ）</h3>
+          <span class="rail-route">博多 ─ 熊本 ─ 鹿兒島中央</span>
+        </div>
+        <span class="rail-status-badge suspended-badge">⛔ 全線停擺</span>
+      </div>
+      <div class="rail-detail-grid">
+        <div class="rail-detail-item">
+          <span class="rdi-label">停駛區間</span>
+          <span class="rdi-val suspended-text">博多 ↔ 鹿兒島中央 全線</span>
+        </div>
+        <div class="rail-detail-item">
+          <span class="rdi-label">再開預定</span>
+          <span class="rdi-val warn-text">未定（待安全確認）</span>
+        </div>
+        <div class="rail-detail-item">
+          <span class="rdi-label">停駛原因</span>
+          <span class="rdi-val">熊本地震造成軌道設施需全面點檢</span>
+        </div>
+      </div>
+      <div class="rail-stations">
+        <div class="station-row">
+          <span class="station suspended-st">博多</span>
+          <span class="st-line suspended-line">────────</span>
+          <span class="station suspended-st">新鳥栖</span>
+          <span class="st-line suspended-line">────────</span>
+          <span class="station suspended-st">久留米</span>
+          <span class="st-line suspended-line">────────</span>
+          <span class="station suspended-st">熊本</span>
+          <span class="st-line suspended-line">────────</span>
+          <span class="station suspended-st">川內</span>
+          <span class="st-line suspended-line">────────</span>
+          <span class="station suspended-st">鹿兒島中央</span>
+        </div>
+      </div>
+      <a href="https://www.jrkyushu.co.jp/railway/index.html" target="_blank" rel="noopener" class="official-link">JR九州 官方運行情報 →</a>
+    </div>
+
+    <!-- 西九州新幹線 -->
+    <div class="rail-card recovered">
+      <div class="rail-card-header">
+        <div class="rail-badge shinkansen west">新幹線</div>
+        <div class="rail-title-block">
+          <h3>西九州新幹線（かもめ）</h3>
+          <span class="rail-route">武雄溫泉 ─ 嬉野溫泉 ─ 新大村 ─ 諫早 ─ 長崎</span>
+        </div>
+        <span class="rail-status-badge recovered-badge">✅ 17:55 已再開</span>
+      </div>
+      <div class="rail-detail-grid">
+        <div class="rail-detail-item">
+          <span class="rdi-label">再開時間</span>
+          <span class="rdi-val ok-text">2026-07-28 17:55（日本時間）全線恢復</span>
+        </div>
+        <div class="rail-detail-item">
+          <span class="rdi-label">運行狀況</span>
+          <span class="rdi-val ok-text">全線正常運行中</span>
+        </div>
+        <div class="rail-detail-item">
+          <span class="rdi-label">注意事項</span>
+          <span class="rdi-val">部分班次時刻可能有調整，請確認時刻表</span>
+        </div>
+      </div>
+      <div class="rail-stations">
+        <div class="station-row">
+          <span class="station ok-st">武雄溫泉</span>
+          <span class="st-line ok-line">────────</span>
+          <span class="station ok-st">嬉野溫泉</span>
+          <span class="st-line ok-line">────────</span>
+          <span class="station ok-st">新大村</span>
+          <span class="st-line ok-line">────────</span>
+          <span class="station ok-st">諫早</span>
+          <span class="st-line ok-line">────────</span>
+          <span class="station ok-st">長崎</span>
+        </div>
+      </div>
+      <a href="https://www.jrkyushu.co.jp/railway/index.html" target="_blank" rel="noopener" class="official-link">JR九州 官方運行情報 →</a>
+    </div>
+
+    <!-- 鹿兒島本線 -->
+    <div class="rail-card suspended">
+      <div class="rail-card-header">
+        <div class="rail-badge local-line">在來線</div>
+        <div class="rail-title-block">
+          <h3>鹿兒島本線</h3>
+          <span class="rail-route">門司港 ─ 博多 ─ 熊本 ─ 鹿兒島中央</span>
+        </div>
+        <span class="rail-status-badge suspended-badge">⛔ 全線停駛</span>
+      </div>
+      <div class="rail-detail-grid">
+        <div class="rail-detail-item">
+          <span class="rdi-label">停駛區間</span>
+          <span class="rdi-val suspended-text">熊本 ↔ 鹿兒島中央（受地震直接影響區間）</span>
+        </div>
+        <div class="rail-detail-item">
+          <span class="rdi-label">北部（博多↔熊本）</span>
+          <span class="rdi-val warn-text">安全確認中，暫停運行</span>
+        </div>
+        <div class="rail-detail-item">
+          <span class="rdi-label">再開預定</span>
+          <span class="rdi-val warn-text">未定</span>
+        </div>
+      </div>
+      <a href="https://www.jrkyushu.co.jp/railway/index.html" target="_blank" rel="noopener" class="official-link">JR九州 官方運行情報 →</a>
+    </div>
+
+    <!-- 豐肥本線 -->
+    <div class="rail-card suspended">
+      <div class="rail-card-header">
+        <div class="rail-badge local-line">在來線</div>
+        <div class="rail-title-block">
+          <h3>豐肥本線（阿蘇横断鐵道）</h3>
+          <span class="rail-route">熊本 ─ 阿蘇 ─ 大分</span>
+        </div>
+        <span class="rail-status-badge suspended-badge">⛔ 全線停駛</span>
+      </div>
+      <div class="rail-detail-grid">
+        <div class="rail-detail-item">
+          <span class="rdi-label">停駛區間</span>
+          <span class="rdi-val suspended-text">熊本 ↔ 大分 全線（經過震央附近）</span>
+        </div>
+        <div class="rail-detail-item">
+          <span class="rdi-label">影響</span>
+          <span class="rdi-val">阿蘇地區陸路交通嚴重中斷</span>
+        </div>
+      </div>
+      <a href="https://www.jrkyushu.co.jp/railway/index.html" target="_blank" rel="noopener" class="official-link">JR九州 官方運行情報 →</a>
+    </div>
+
+    <!-- 熊本市電 -->
+    <div class="rail-card warning-card">
+      <div class="rail-card-header">
+        <div class="rail-badge tram-badge">市電</div>
+        <div class="rail-title-block">
+          <h3>熊本市電</h3>
+          <span class="rail-route">A系統・B系統</span>
+        </div>
+        <span class="rail-status-badge warning-badge-sm">⚠ 確認中</span>
+      </div>
+      <div class="rail-detail-grid">
+        <div class="rail-detail-item">
+          <span class="rdi-label">A系統</span>
+          <span class="rdi-val warn-text">健軍町 ↔ 上熊本 — 安全確認中</span>
+        </div>
+        <div class="rail-detail-item">
+          <span class="rdi-label">B系統</span>
+          <span class="rdi-val warn-text">健軍町 ↔ 熊本站前 — 安全確認中</span>
+        </div>
+      </div>
+      <a href="https://www.kotsu-kumamoto.jp/" target="_blank" rel="noopener" class="official-link">熊本市交通局 →</a>
+    </div>
+  </div><!-- /1-1 鐵路 -->
+
+  <!-- 1-2 公路 -->
+  <div class="sub-section">
+    <div class="sub-header"><span class="sub-icon">🛣️</span><h2>公路・高速巴士交通</h2></div>
+
+    <div class="road-grid">
+      <!-- 高速公路 -->
+      <div class="road-card">
+        <h3 class="road-card-title">⛔ 高速公路封閉路段</h3>
+        <div class="road-list">
+          <div class="road-item suspended-rd">
+            <span class="rd-icon">🚧</span>
+            <div>
+              <div class="rd-title">九州自動車道</div>
+              <div class="rd-desc">八代IC ↔ えびのIC 區間 — 緊急點檢中，暫時封閉</div>
+            </div>
+            <span class="rd-badge suspended-badge-sm">封閉</span>
+          </div>
+          <div class="road-item suspended-rd">
+            <span class="rd-icon">🚧</span>
+            <div>
+              <div class="rd-title">南九州西回り自動車道</div>
+              <div class="rd-desc">宇土PA附近 — 路面損傷確認中</div>
+            </div>
+            <span class="rd-badge suspended-badge-sm">封閉</span>
+          </div>
+          <div class="road-item warning-rd">
+            <span class="rd-icon">⚠️</span>
+            <div>
+              <div class="rd-title">九州自動車道（北部）</div>
+              <div class="rd-desc">博多IC ↔ 熊本IC — 低速通行，部分管制</div>
+            </div>
+            <span class="rd-badge warning-badge-sm">管制中</span>
+          </div>
+          <div class="road-item ok-rd">
+            <span class="rd-icon">✅</span>
+            <div>
+              <div class="rd-title">長崎自動車道・大分自動車道</div>
+              <div class="rd-desc">目前正常通行，注意餘震風險</div>
+            </div>
+            <span class="rd-badge ok-badge-sm">正常</span>
+          </div>
+        </div>
+        <a href="https://www.w-nexco.co.jp/" target="_blank" rel="noopener" class="official-link">NEXCO西日本 道路情報 →</a>
+      </div>
+
+      <!-- 高速巴士 -->
+      <div class="road-card">
+        <h3 class="road-card-title">🚌 高速巴士運行狀況</h3>
+        <div class="road-list">
+          <div class="road-item suspended-rd">
+            <span class="rd-icon">🚌</span>
+            <div>
+              <div class="rd-title">福岡（天神・博多）↔ 熊本</div>
+              <div class="rd-desc">
+                停駛至 <strong>明日（7/29）中午12:00</strong><br>
+                下午能否恢復視道路安全確認結果而定
+              </div>
+            </div>
+            <span class="rd-badge suspended-badge-sm">停駛</span>
+          </div>
+          <div class="road-item suspended-rd">
+            <span class="rd-icon">🚌</span>
+            <div>
+              <div class="rd-title">熊本 ↔ 鹿兒島</div>
+              <div class="rd-desc">受九州自動車道封閉影響，全日停駛，恢復時間未定</div>
+            </div>
+            <span class="rd-badge suspended-badge-sm">停駛</span>
+          </div>
+          <div class="road-item warning-rd">
+            <span class="rd-icon">🚌</span>
+            <div>
+              <div class="rd-title">熊本 ↔ 大分・別府</div>
+              <div class="rd-desc">確認中，因豐肥本線停駛，預計代行巴士可能調整</div>
+            </div>
+            <span class="rd-badge warning-badge-sm">確認中</span>
+          </div>
+          <div class="road-item ok-rd">
+            <span class="rd-icon">🚌</span>
+            <div>
+              <div class="rd-title">福岡 ↔ 長崎・佐世保</div>
+              <div class="rd-desc">目前正常運行（使用長崎自動車道）</div>
+            </div>
+            <span class="rd-badge ok-badge-sm">正常</span>
+          </div>
+          <div class="road-item ok-rd">
+            <span class="rd-icon">🚌</span>
+            <div>
+              <div class="rd-title">福岡 ↔ 大分・別府</div>
+              <div class="rd-desc">大分自動車道段正常，部分班次可能延誤</div>
+            </div>
+            <span class="rd-badge ok-badge-sm">正常</span>
+          </div>
+        </div>
+        <p class="road-note">⚠ 其他路線高速巴士請上各巴士公司官網查詢最新資訊</p>
+        <div class="bus-links">
+          <a href="https://www.nishitetsu.jp/bus/highwaybus/" target="_blank" rel="noopener" class="bus-link">西鐵巴士 →</a>
+          <a href="https://www.kyusanko.co.jp/sankobus/" target="_blank" rel="noopener" class="bus-link">九州産交 →</a>
+          <a href="https://www.ibus.co.jp/" target="_blank" rel="noopener" class="bus-link">いわさきバス →</a>
+        </div>
+      </div>
+    </div>
+  </div><!-- /1-2 公路 -->
+
+  <!-- 1-3 景點周邊交通 -->
+  <div class="sub-section">
+    <div class="sub-header"><span class="sub-icon">📍</span><h2>台灣旅客常去景點周邊交通</h2></div>
+    <p class="sub-note">以下為各景點目前已知交通狀況（以熊本、阿蘇、黑川、高千穗、別府、由布院地區為主）</p>
+
+    <div class="spot-transport-grid">
+
+      <div class="spot-transport-card">
+        <div class="spt-header">
+          <span class="spt-area-badge kumamoto-badge">熊本市區</span>
+          <span class="spt-status warn-text">⚠ 部分中斷</span>
+        </div>
+        <ul class="spt-list">
+          <li><span class="spt-icon suspended-text">✖</span> JR熊本站發車各線全面停駛</li>
+          <li><span class="spt-icon warn-text">△</span> 市電：安全確認中，暫停服務</li>
+          <li><span class="spt-icon suspended-text">✖</span> 熊本→福岡高速巴士停駛至明日中午</li>
+          <li><span class="spt-icon ok-text">✓</span> 熊本機場巴士：視機場狀況，待確認</li>
+        </ul>
+      </div>
+
+      <div class="spot-transport-card">
+        <div class="spt-header">
+          <span class="spt-area-badge aso-badge">阿蘇・黑川</span>
+          <span class="spt-status suspended-text">⛔ 嚴重中斷</span>
+        </div>
+        <ul class="spt-list">
+          <li><span class="spt-icon suspended-text">✖</span> 豐肥本線（熊本↔阿蘇）全線停駛</li>
+          <li><span class="spt-icon suspended-text">✖</span> 九州橫断巴士：運行未定</li>
+          <li><span class="spt-icon warn-text">△</span> 自駕：部分山道需確認落石情況</li>
+          <li><span class="spt-icon suspended-text">✖</span> 黑川溫泉バス：運行中止</li>
+        </ul>
+      </div>
+
+      <div class="spot-transport-card">
+        <div class="spt-header">
+          <span class="spt-area-badge takachiho-badge">高千穗</span>
+          <span class="spt-status warn-text">⚠ 確認中</span>
+        </div>
+        <ul class="spt-list">
+          <li><span class="spt-icon ok-text">✓</span> 高千穗鐵道：原本停駛，不受本次地震額外影響</li>
+          <li><span class="spt-icon warn-text">△</span> 高速巴士（延岡↔高千穗）：確認中</li>
+          <li><span class="spt-icon warn-text">△</span> 自駕：山道崩塌風險，請注意路況</li>
+        </ul>
+      </div>
+
+      <div class="spot-transport-card">
+        <div class="spt-header">
+          <span class="spt-area-badge beppu-badge">別府・由布院・大分</span>
+          <span class="spt-status ok-text">✓ 相對正常</span>
+        </div>
+        <ul class="spt-list">
+          <li><span class="spt-icon ok-text">✓</span> JR日豊本線（大分市區段）：正常</li>
+          <li><span class="spt-icon ok-text">✓</span> 由布院の森：確認後可望正常發車</li>
+          <li><span class="spt-icon ok-text">✓</span> 大分自動車道：正常通行</li>
+          <li><span class="spt-icon warn-text">△</span> 大分↔熊本 豐肥本線：全線停駛</li>
+          <li><span class="spt-icon ok-text">✓</span> 大分機場：目前正常運作</li>
+        </ul>
+      </div>
+
+    </div>
+  </div><!-- /1-3 景點周邊 -->
+
+</section><!-- /sec-transport -->
+
+
+<!-- ===================================================
+     SECTION 2: 台灣↔九州 航班
+     =================================================== -->
+<section class="info-section" id="sec-flights">
+
+  <!-- 2-1 航空公司動態 -->
+  <div class="sub-section">
+    <div class="sub-header"><span class="sub-icon">✈️</span><h2>台灣四大航空 — 即時動態與退改政策</h2></div>
+    <p class="sub-note">各次更新狀態均保留記錄。點擊航空公司名稱可連結至官方說明頁。</p>
+
+    <div class="airline-section-grid">
+
+      <!-- 華航 CI -->
+      <div class="airline-full-card ci-card">
+        <div class="airline-full-header">
+          <a href="https://www.china-airlines.com/tw/zh/fly/prepare-for-fly/special-info/earthquake-japan" target="_blank" rel="noopener" class="airline-name-link ci-name">
+            <span class="airline-logo-text">CI</span> 中華航空 China Airlines
+          </a>
+          <span class="airline-overall-status status-warn">⚠ 受影響</span>
+        </div>
+        <!-- 退改政策 -->
+        <div class="refund-policy-box ci-policy">
+          <div class="policy-title">📋 退改票政策（官方公告）</div>
+          <p>凡持有中華航空 <strong>2026年8月5日前（含）</strong> 往返熊本（KMJ）機票：</p>
+          <ul class="policy-list">
+            <li>可免費更改目的地至 <strong>福岡（FUK）或鹿兒島（KOJ）</strong>，14天內的班次</li>
+            <li>可免費全額退票</li>
+            <li>洽原開票旅行社，或中華航空客服、各地分公司</li>
+          </ul>
+          <a href="https://www.china-airlines.com" target="_blank" rel="noopener" class="policy-link">→ 中華航空官網辦理退改</a>
+        </div>
+        <!-- 班次列表 -->
+        <div class="flight-rows-container" id="ci-flights">
+          <table class="airline-flight-table">
+            <thead><tr><th>班號</th><th>路線</th><th>預定時間</th><th>最新狀態</th><th>更新時間</th></tr></thead>
+            <tbody id="ci-tbody">
+              <tr><td>CI 121</td><td>TPE → KMJ</td><td>10:10</td><td><span class="fs-tag fs-cancelled">取消</span></td><td class="update-ts">初始資料</td></tr>
+              <tr><td>CI 122</td><td>KMJ → TPE</td><td>15:25</td><td><span class="fs-tag fs-cancelled">取消</span></td><td class="update-ts">初始資料</td></tr>
+              <tr><td>CI 106</td><td>TPE → FUK</td><td>08:35</td><td><span class="fs-tag fs-delayed">延誤</span></td><td class="update-ts">初始資料</td></tr>
+              <tr><td>CI 105</td><td>FUK → TPE</td><td>07:00</td><td><span class="fs-tag fs-normal">正常</span></td><td class="update-ts">初始資料</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- 更新歷史 -->
+        <div class="update-history" id="ci-history">
+          <div class="history-title">📝 更新記錄</div>
+          <div class="history-list" id="ci-history-list">
+            <div class="history-item"><span class="hist-time">23:20 (7/28)</span><span class="hist-content">KMJ往返班次全數取消；FUK路線維持，部分延誤。退改政策已公布（8/5前免費）。</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 長榮 BR -->
+      <div class="airline-full-card br-card">
+        <div class="airline-full-header">
+          <a href="https://www.evaair.com/zh-tw/index.html" target="_blank" rel="noopener" class="airline-name-link br-name">
+            <span class="airline-logo-text br-logo">BR</span> 長榮航空 EVA Air
+          </a>
+          <span class="airline-overall-status status-warn">⚠ 部分影響</span>
+        </div>
+        <div class="refund-policy-box br-policy">
+          <div class="policy-title">📋 退改票政策（官方公告）</div>
+          <p>持有 <strong>2026年8月5日前</strong> 往返熊本（KMJ）機票的旅客：</p>
+          <ul class="policy-list">
+            <li>可免費退票或更改日期（14日內）</li>
+            <li>請洽長榮航空訂位中心 <strong>02-2501-1999</strong></li>
+          </ul>
+          <a href="https://www.evaair.com" target="_blank" rel="noopener" class="policy-link">→ 長榮航空官網辦理退改</a>
+        </div>
+        <div class="flight-rows-container">
+          <table class="airline-flight-table">
+            <thead><tr><th>班號</th><th>路線</th><th>預定時間</th><th>最新狀態</th><th>更新時間</th></tr></thead>
+            <tbody id="br-tbody">
+              <tr><td>BR 112</td><td>TPE → FUK</td><td>10:55</td><td><span class="fs-tag fs-normal">正常</span></td><td class="update-ts">初始資料</td></tr>
+              <tr><td>BR 111</td><td>FUK → TPE</td><td>09:30</td><td><span class="fs-tag fs-normal">正常</span></td><td class="update-ts">初始資料</td></tr>
+              <tr><td>BR 200</td><td>TPE → OIT</td><td>09:45</td><td><span class="fs-tag fs-normal">正常</span></td><td class="update-ts">初始資料</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="update-history">
+          <div class="history-title">📝 更新記錄</div>
+          <div class="history-list" id="br-history-list">
+            <div class="history-item"><span class="hist-time">23:20 (7/28)</span><span class="hist-content">FUK往返及OIT路線正常運行；KMJ班次已暫停，退改政策公布中。</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 星宇 JX -->
+      <div class="airline-full-card jx-card">
+        <div class="airline-full-header">
+          <a href="https://www.starlux-airlines.com/zh-TW" target="_blank" rel="noopener" class="airline-name-link jx-name">
+            <span class="airline-logo-text jx-logo">JX</span> 星宇航空 STARLUX
+          </a>
+          <span class="airline-overall-status status-danger">⛔ 部分取消</span>
+        </div>
+        <div class="refund-policy-box jx-policy">
+          <div class="policy-title">📋 退改票政策（官方公告）</div>
+          <p>持有 <strong>2026年8月5日前</strong> 往返熊本（KMJ）機票：</p>
+          <ul class="policy-list">
+            <li>今日所有TPE↔KMJ班次確認取消</li>
+            <li>可免費全額退票，或改期至14天內福岡班次</li>
+            <li>洽星宇客服 <strong>02-2791-1199</strong></li>
+          </ul>
+          <a href="https://www.starlux-airlines.com" target="_blank" rel="noopener" class="policy-link">→ 星宇航空官網辦理退改</a>
+        </div>
+        <div class="flight-rows-container">
+          <table class="airline-flight-table">
+            <thead><tr><th>班號</th><th>路線</th><th>預定時間</th><th>最新狀態</th><th>更新時間</th></tr></thead>
+            <tbody id="jx-tbody">
+              <tr><td>JX 801</td><td>TPE → KMJ</td><td>14:30</td><td><span class="fs-tag fs-cancelled">取消</span></td><td class="update-ts">初始資料</td></tr>
+              <tr><td>JX 802</td><td>KMJ → TPE</td><td>18:45</td><td><span class="fs-tag fs-cancelled">取消</span></td><td class="update-ts">初始資料</td></tr>
+              <tr><td>JX 803</td><td>TXG → KMJ</td><td>13:00</td><td><span class="fs-tag fs-cancelled">取消</span></td><td class="update-ts">初始資料</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="update-history">
+          <div class="history-title">📝 更新記錄</div>
+          <div class="history-list" id="jx-history-list">
+            <div class="history-item"><span class="hist-time">23:20 (7/28)</span><span class="hist-content">今日全部KMJ班次（含TXG出發）確認取消，提供免費退票或改期服務。</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 台灣虎航 IT -->
+      <div class="airline-full-card it-card">
+        <div class="airline-full-header">
+          <a href="https://www.tigerairtw.com/zh-tw" target="_blank" rel="noopener" class="airline-name-link it-name">
+            <span class="airline-logo-text it-logo">IT</span> 台灣虎航 Tigerair Taiwan
+          </a>
+          <span class="airline-overall-status status-danger">⛔ 部分取消</span>
+        </div>
+        <div class="refund-policy-box it-policy">
+          <div class="policy-title">📋 退改票政策（官方公告）</div>
+          <p>持有 <strong>2026年8月5日前</strong> 往返熊本（KMJ）機票：</p>
+          <ul class="policy-list">
+            <li>受影響旅客可申請免費退票或改期</li>
+            <li>客服專線 <strong>02-5599-6296</strong></li>
+          </ul>
+          <a href="https://www.tigerairtw.com" target="_blank" rel="noopener" class="policy-link">→ 台灣虎航官網辦理退改</a>
+        </div>
+        <div class="flight-rows-container">
+          <table class="airline-flight-table">
+            <thead><tr><th>班號</th><th>路線</th><th>預定時間</th><th>最新狀態</th><th>更新時間</th></tr></thead>
+            <tbody id="it-tbody">
+              <tr><td>IT 237</td><td>TPE → KMJ</td><td>09:00</td><td><span class="fs-tag fs-cancelled">取消</span></td><td class="update-ts">初始資料</td></tr>
+              <tr><td>IT 238</td><td>KMJ → TPE</td><td>12:10</td><td><span class="fs-tag fs-cancelled">取消</span></td><td class="update-ts">初始資料</td></tr>
+              <tr><td>IT 371</td><td>KHH → FUK</td><td>11:30</td><td><span class="fs-tag fs-normal">正常</span></td><td class="update-ts">初始資料</td></tr>
+              <tr><td>IT 372</td><td>FUK → KHH</td><td>14:50</td><td><span class="fs-tag fs-normal">正常</span></td><td class="update-ts">初始資料</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="update-history">
+          <div class="history-title">📝 更新記錄</div>
+          <div class="history-list" id="it-history-list">
+            <div class="history-item"><span class="hist-time">23:20 (7/28)</span><span class="hist-content">KMJ往返班次取消；KHH↔FUK正常運行。退改票申請中。</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /2-1 航空公司 -->
+
+  <!-- 2-2 機場狀況 -->
+  <div class="sub-section">
+    <div class="sub-header"><span class="sub-icon">🛬</span><h2>九州各機場 — 台灣有直航路線</h2></div>
+
+    <div class="airport-grid">
+
+      <div class="airport-card suspended-airport">
+        <div class="airport-header">
+          <div class="airport-iata">KMJ</div>
+          <div>
+            <div class="airport-name">阿蘇熊本機場</div>
+            <div class="airport-status-line"><span class="ap-badge suspended-badge">⛔ 暫停</span></div>
+          </div>
+        </div>
+        <div class="airport-detail">
+          <div class="ap-row"><span class="ap-label">設施狀況</span><span class="ap-val suspended-text">跑道損傷檢驗中，尚未確認可否起降</span></div>
+          <div class="ap-row"><span class="ap-label">預計恢復</span><span class="ap-val warn-text">預定明日（7/29）評估恢復，視跑道檢驗結果而定</span></div>
+          <div class="ap-row"><span class="ap-label">台灣航線</span><span class="ap-val">TPE（華航CI、星宇JX、虎航IT）、TXG（星宇JX）</span></div>
+          <div class="ap-row"><span class="ap-label">機場巴士</span><span class="ap-val suspended-text">暫停，待機場恢復後重啟</span></div>
+        </div>
+        <a href="https://kumamoto-airport.co.jp/" target="_blank" rel="noopener" class="official-link">熊本機場官網 →</a>
+      </div>
+
+      <div class="airport-card ok-airport">
+        <div class="airport-header">
+          <div class="airport-iata ok-iata">FUK</div>
+          <div>
+            <div class="airport-name">福岡機場</div>
+            <div class="airport-status-line"><span class="ap-badge ok-badge-ap">✅ 正常運作</span></div>
+          </div>
+        </div>
+        <div class="airport-detail">
+          <div class="ap-row"><span class="ap-label">設施狀況</span><span class="ap-val ok-text">正常，未受地震直接影響</span></div>
+          <div class="ap-row"><span class="ap-label">台灣航線</span><span class="ap-val">TPE（華航CI、長榮BR、虎航IT、樂桃MM等）、KHH（虎航IT）</span></div>
+          <div class="ap-row"><span class="ap-label">往市區</span><span class="ap-val ok-text">地鐵、巴士正常</span></div>
+          <div class="ap-row"><span class="ap-label">往熊本</span><span class="ap-val suspended-text">新幹線停擺；高速巴士停駛至明日中午</span></div>
+        </div>
+        <a href="https://www.fukuoka-airport.co.jp/" target="_blank" rel="noopener" class="official-link">福岡機場官網 →</a>
+      </div>
+
+      <div class="airport-card warning-airport">
+        <div class="airport-header">
+          <div class="airport-iata warn-iata">HSG</div>
+          <div>
+            <div class="airport-name">佐賀機場</div>
+            <div class="airport-status-line"><span class="ap-badge warning-badge-sm">⚠ 確認中</span></div>
+          </div>
+        </div>
+        <div class="airport-detail">
+          <div class="ap-row"><span class="ap-label">設施狀況</span><span class="ap-val warn-text">設施安全確認中，目前暫緩起降</span></div>
+          <div class="ap-row"><span class="ap-label">台灣航線</span><span class="ap-val">TPE（台灣虎航IT季節性）</span></div>
+          <div class="ap-row"><span class="ap-label">預計恢復</span><span class="ap-val warn-text">待官方公告</span></div>
+        </div>
+        <a href="https://www.pref.saga.lg.jp/kiji00399038/index.html" target="_blank" rel="noopener" class="official-link">佐賀機場資訊 →</a>
+      </div>
+
+      <div class="airport-card ok-airport">
+        <div class="airport-header">
+          <div class="airport-iata ok-iata">OIT</div>
+          <div>
+            <div class="airport-name">大分機場</div>
+            <div class="airport-status-line"><span class="ap-badge ok-badge-ap">✅ 正常運作</span></div>
+          </div>
+        </div>
+        <div class="airport-detail">
+          <div class="ap-row"><span class="ap-label">設施狀況</span><span class="ap-val ok-text">正常，未受地震直接影響</span></div>
+          <div class="ap-row"><span class="ap-label">台灣航線</span><span class="ap-val">TPE（長榮BR），別府・由布院地區最近機場</span></div>
+          <div class="ap-row"><span class="ap-label">往市區</span><span class="ap-val ok-text">機場巴士正常，約1小時抵別府</span></div>
+        </div>
+        <a href="https://www.oita-airport.co.jp/" target="_blank" rel="noopener" class="official-link">大分機場官網 →</a>
+      </div>
+
+    </div>
+  </div><!-- /2-2 機場 -->
+
+</section><!-- /sec-flights -->
+
+
+<!-- ===================================================
+     SECTION 3: 熊本知名景點營運狀況
+     =================================================== -->
+<section class="info-section" id="sec-spots">
+
+  <div class="sub-section">
+    <div class="sub-header"><span class="sub-icon">🏯</span><h2>熊本地區知名景點營運狀況</h2></div>
+    <p class="sub-note">下列景點狀況為地震後初步資訊，請以各景點官方公告為最終依據。★ = 台灣旅客特別推薦景點</p>
+
+    <!-- 熊本市區 -->
+    <div class="spot-area-block">
+      <div class="spot-area-header kumamoto-area">
+        <span class="area-name-big">🏯 熊本市區</span>
+      </div>
+      <div class="spots-grid">
+        <div class="spot-card suspended-spot">
+          <div class="spot-name-row"><span class="star-mark">★</span><span class="spot-name">熊本城</span><span class="spot-status-tag suspended-tag">暫停開放</span></div>
+          <p class="spot-desc">地震後實施緊急安全確認，天守閣及城內全面關閉。2016年地震後已修復的部分需再次評估損傷。</p>
+          <a href="https://castle.kumamoto-guide.jp/" target="_blank" rel="noopener" class="spot-link">熊本城公式HP →</a>
+        </div>
+        <div class="spot-card suspended-spot">
+          <div class="spot-name-row"><span class="spot-name">櫻花馬場城彩苑</span><span class="spot-status-tag suspended-tag">暫停開放</span></div>
+          <p class="spot-desc">熊本城周邊，目前隨熊本城一同關閉，商店及餐廳均暫停營業。</p>
+          <a href="https://www.sakuranobaba-johsaien.jp/" target="_blank" rel="noopener" class="spot-link">城彩苑官網 →</a>
+        </div>
+        <div class="spot-card warning-spot">
+          <div class="spot-name-row"><span class="spot-name">熊本熊廣場</span><span class="spot-status-tag warning-tag">確認中</span></div>
+          <p class="spot-desc">位於熊本市中心，設施安全確認中，本日可能暫停開放。</p>
+          <a href="https://kumamon-square.jp/" target="_blank" rel="noopener" class="spot-link">熊本熊廣場官網 →</a>
+        </div>
+        <div class="spot-card warning-spot">
+          <div class="spot-name-row"><span class="spot-name">水前寺成趣園</span><span class="spot-status-tag warning-tag">確認中</span></div>
+          <p class="spot-desc">江戶時代庭園，正進行設施安全確認，暫時關閉。</p>
+          <a href="https://www.suizenji.or.jp/" target="_blank" rel="noopener" class="spot-link">水前寺公式HP →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 阿蘇・黑川 -->
+    <div class="spot-area-block">
+      <div class="spot-area-header aso-area">
+        <span class="area-name-big">🌋 阿蘇・黑川溫泉</span>
+      </div>
+      <div class="spots-grid">
+        <div class="spot-card suspended-spot">
+          <div class="spot-name-row"><span class="spot-name">阿蘇神社</span><span class="spot-status-tag suspended-tag">暫停開放</span></div>
+          <p class="spot-desc">2016年地震受損後修復中的神社，本次地震後已緊急關閉，損傷情況調查中。</p>
+          <a href="https://asojinja.or.jp/" target="_blank" rel="noopener" class="spot-link">阿蘇神社HP →</a>
+        </div>
+        <div class="spot-card suspended-spot">
+          <div class="spot-name-row"><span class="spot-name">阿蘇農場樂園</span><span class="spot-status-tag suspended-tag">暫停開放</span></div>
+          <p class="spot-desc">大型複合設施，全面關閉中，設施安全確認需時。</p>
+          <a href="https://www.aso-farmland.co.jp/" target="_blank" rel="noopener" class="spot-link">阿蘇農場樂園HP →</a>
+        </div>
+        <div class="spot-card suspended-spot">
+          <div class="spot-name-row"><span class="spot-name">大観峰展望所</span><span class="spot-status-tag suspended-tag">暫停開放</span></div>
+          <p class="spot-desc">位於阿蘇外輪山頂，往大観峰的道路受地震影響，目前封閉。</p>
+        </div>
+        <div class="spot-card suspended-spot">
+          <div class="spot-name-row"><span class="star-mark">★</span><span class="spot-name">黑川溫泉</span><span class="spot-status-tag warning-tag">確認中</span></div>
+          <p class="spot-desc">各旅館自行評估損傷，部分旅館可能暫停接受住宿，請個別聯繫旅館確認。</p>
+          <a href="https://www.kurokawaonsen.or.jp/" target="_blank" rel="noopener" class="spot-link">黑川溫泉旅館組合HP →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 高千穗 -->
+    <div class="spot-area-block">
+      <div class="spot-area-header takachiho-area">
+        <span class="area-name-big">⛩️ 高千穗</span>
+      </div>
+      <div class="spots-grid">
+        <div class="spot-card warning-spot">
+          <div class="spot-name-row"><span class="star-mark">★</span><span class="spot-name">高千穗峽</span><span class="spot-status-tag warning-tag">確認中</span></div>
+          <p class="spot-desc">溪谷地形，需確認岩石崩落情形。往高千穗峽的道路是否受損亦在確認中，划船活動暫停。</p>
+          <a href="https://takachiho-kanko.info/" target="_blank" rel="noopener" class="spot-link">高千穗觀光協會HP →</a>
+        </div>
+        <div class="spot-card warning-spot">
+          <div class="spot-name-row"><span class="spot-name">高千穗神社</span><span class="spot-status-tag warning-tag">確認中</span></div>
+          <p class="spot-desc">設施安全確認中，夜神楽等活動暫停。</p>
+          <a href="https://takachiho-jinja.jp/" target="_blank" rel="noopener" class="spot-link">高千穗神社HP →</a>
+        </div>
+        <div class="spot-card warning-spot">
+          <div class="spot-name-row"><span class="spot-name">天岩戶神社</span><span class="spot-status-tag warning-tag">確認中</span></div>
+          <p class="spot-desc">岩窟地形，需確認地震後安全狀況，目前暫停特別參拜。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 別府・由布院・大分 -->
+    <div class="spot-area-block">
+      <div class="spot-area-header beppu-area">
+        <span class="area-name-big">♨️ 別府・湯布院・大分</span>
+      </div>
+      <div class="spots-grid">
+        <div class="spot-card ok-spot">
+          <div class="spot-name-row"><span class="star-mark">★</span><span class="spot-name">別府地獄溫泉</span><span class="spot-status-tag ok-tag">正常開放</span></div>
+          <p class="spot-desc">別府地區與熊本震央距離較遠，「地獄巡遊」各景點目前正常開放，請保持警戒。</p>
+          <a href="https://www.beppu-jigoku.com/" target="_blank" rel="noopener" class="spot-link">別府地獄HP →</a>
+        </div>
+        <div class="spot-card ok-spot">
+          <div class="spot-name-row"><span class="spot-name">竹瓦溫泉</span><span class="spot-status-tag ok-tag">正常開放</span></div>
+          <p class="spot-desc">別府市中心，公共浴場正常營業中。</p>
+        </div>
+        <div class="spot-card ok-spot">
+          <div class="spot-name-row"><span class="star-mark">★</span><span class="spot-name">由布院（湯布院）</span><span class="spot-status-tag ok-tag">大致正常</span></div>
+          <p class="spot-desc">由布院地區大部分旅館和商店正常營業，由布院の森列車確認後可望正常發車。金鱗湖周邊景點正常。</p>
+          <a href="https://www.yufuin.gr.jp/" target="_blank" rel="noopener" class="spot-link">由布院觀光協會HP →</a>
+        </div>
+        <div class="spot-card ok-spot">
+          <div class="spot-name-row"><span class="spot-name">金鱗湖</span><span class="spot-status-tag ok-tag">正常開放</span></div>
+          <p class="spot-desc">由布院市街地，目前正常。</p>
+        </div>
+        <div class="spot-card warning-spot">
+          <div class="spot-name-row"><span class="spot-name">城島高原遊樂園</span><span class="spot-status-tag warning-tag">確認中</span></div>
+          <p class="spot-desc">大型遊樂設施，正進行設備安全確認，可能暫停部分設施。</p>
+          <a href="https://www.kirishimabeervilla.co.jp/kirishima/castle/" target="_blank" rel="noopener" class="spot-link">城島高原HP →</a>
+        </div>
+        <div class="spot-card ok-spot">
+          <div class="spot-name-row"><span class="spot-name">大分海洋宮殿水族館</span><span class="spot-status-tag ok-tag">正常開放</span></div>
+          <p class="spot-desc">大分市，umino-umi 水族館目前正常營業。</p>
+          <a href="https://www.umino-umi.jp/" target="_blank" rel="noopener" class="spot-link">水族館HP →</a>
+        </div>
+        <div class="spot-card ok-spot">
+          <div class="spot-name-row"><span class="spot-name">三麗鷗 Harmony Land</span><span class="spot-status-tag ok-tag">正常開放</span></div>
+          <p class="spot-desc">大分縣日出町，遠離震央，目前正常營業。建議出發前致電確認。</p>
+          <a href="https://www.harmonyland.co.jp/" target="_blank" rel="noopener" class="spot-link">Harmony Land HP →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section><!-- /sec-spots -->
+
+
+<!-- ===================================================
+     SECTION 4: 地震即時資訊 (USGS)
+     =================================================== -->
+<section class="info-section" id="sec-eq">
+  <div class="sub-section">
+    <div class="sub-header"><span class="sub-icon">🔴</span><h2>地震即時資訊</h2></div>
+
+    <div class="eq-quick-cards">
+      <div class="eq-qcard red-qcard">
+        <div class="eq-qcard-label">主震規模</div><div class="eq-qcard-val">M 7.1</div>
+        <div class="eq-qcard-sub">2026-07-28 16:27 JST</div>
+      </div>
+      <div class="eq-qcard orange-qcard">
+        <div class="eq-qcard-label">最大震度</div><div class="eq-qcard-val">7</div>
+        <div class="eq-qcard-sub">宇城市・氷川町</div>
+      </div>
+      <div class="eq-qcard blue-qcard">
+        <div class="eq-qcard-label">震源深度</div><div class="eq-qcard-val">10km</div>
+        <div class="eq-qcard-sub">熊本縣熊本地方</div>
+      </div>
+      <div class="eq-qcard purple-qcard">
+        <div class="eq-qcard-label">海嘯警報</div><div class="eq-qcard-val" style="font-size:1.1rem">發布中</div>
+        <div class="eq-qcard-sub">有明海・八代海</div>
+      </div>
+    </div>
+
+    <h3 class="feed-title" style="margin:1.2rem 0 .6rem">🌏 USGS 即時地震資料（九州周邊 M4.5+）<span class="loading-indicator" id="usgsLoadingIndicator"></span></h3>
+    <div class="usgs-table-wrapper">
+      <table class="usgs-table">
+        <thead><tr><th>時間（JST）</th><th>地點</th><th>規模</th><th>深度</th></tr></thead>
+        <tbody id="usgsTableBody"><tr><td colspan="4" class="loading-text">載入中...</td></tr></tbody>
+      </table>
+    </div>
+
+    <h3 class="feed-title" style="margin:1.5rem 0 .6rem">📡 地震最新消息<span class="loading-indicator" id="eqLoadingIndicator"></span></h3>
+    <div class="news-feed" id="earthquakeNewsFeed">
+      <div class="news-skeleton"></div><div class="news-skeleton"></div><div class="news-skeleton"></div>
+    </div>
+  </div>
+</section><!-- /sec-eq -->
+
+
+<!-- ===================================================
+     FEEDBACK
+     =================================================== -->
+<section class="feedback-section">
+  <div class="feedback-inner">
+    <div class="feedback-header">
+      <span class="feedback-icon">💬</span>
+      <h2 class="feedback-title">意見回饋</h2>
+      <p class="feedback-sub">若您有最新消息、錯誤更正，或需要協助，歡迎來信告知。</p>
+    </div>
+    <div class="feedback-form-wrap">
+      <div class="feedback-fields">
+        <input type="text" id="fb-subject" placeholder="主旨（如：更新黑川溫泉資訊）" class="feedback-input"/>
+        <textarea id="fb-body" rows="4" placeholder="請輸入您的訊息或最新消息..." class="feedback-textarea"></textarea>
+      </div>
+      <button class="feedback-send-btn" onclick="sendFeedback()">
+        <span>📧</span> 發送至 Gmail
+      </button>
+    </div>
+    <p class="feedback-note">點擊後將開啟您的郵件應用程式，寄至本站負責人信箱。</p>
+  </div>
+</section>
+
+</main><!-- /main -->
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-sources">
+      <h4>資料來源</h4>
+      <div class="source-links">
+        <a href="https://www.jma.go.jp/" target="_blank" rel="noopener">日本氣象廳 JMA</a>
+        <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a>
+        <a href="https://api.p2pquake.net/" target="_blank" rel="noopener">P2P地震情報</a>
+        <a href="https://www.jrkyushu.co.jp/" target="_blank" rel="noopener">JR九州</a>
+        <a href="https://kumamoto-airport.co.jp/" target="_blank" rel="noopener">熊本機場</a>
+        <a href="https://www.fukuoka-airport.co.jp/" target="_blank" rel="noopener">福岡機場</a>
+        <a href="https://www.boca.gov.tw/" target="_blank" rel="noopener">外交部領事局</a>
+      </div>
+    </div>
+    <div class="footer-notice">
+      <p>⚠ 本頁每5分鐘自動更新，僅供參考。緊急狀況請以官方公告為準。</p>
+      <p class="footer-update" id="footerUpdateTime"></p>
+    </div>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
