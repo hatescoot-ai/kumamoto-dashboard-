@@ -260,9 +260,15 @@ async function loadJRKyushuAnnouncements() {
 
     container.innerHTML = links.map(l => {
       let badge = backendSettings.dualVerify ? '<span class="verified-badge">✅ 官方發布比對無誤</span>' : '';
-      return `<a href="${l.url}" target="_blank" rel="noopener" style="text-decoration:none; color:var(--red); font-weight:bold; font-size:.95rem; display:flex; align-items:center; gap:6px; padding: 4px 0;">
-        📄 ${esc(l.text)} ${badge}
-      </a>`;
+      const viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(l.url)}&embedded=true`;
+      return `<div style="margin-bottom:12px;">
+        <div style="display:flex; align-items:center; gap:6px; padding:4px 0; flex-wrap:wrap;">
+          <span style="color:var(--red); font-weight:bold; font-size:.95rem;">📄 ${esc(l.text)}</span>
+          ${badge}
+          <a href="${l.url}" target="_blank" rel="noopener" style="color:var(--txt2); font-size:.75rem; text-decoration:underline; margin-left:auto;">另開原始 PDF ↗</a>
+        </div>
+        <iframe src="${viewerUrl}" style="width:100%; height:480px; border:1px solid rgba(255,255,255,0.1); border-radius:8px; background:#1a1a2e; margin-top:6px;" loading="lazy" title="${esc(l.text)}"></iframe>
+      </div>`;
     }).join('');
   } catch(e) {
     console.warn('JR Kyushu fetch error', e);
