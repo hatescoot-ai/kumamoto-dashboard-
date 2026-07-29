@@ -68,7 +68,8 @@ const SCENARIOS = {
         badge: "✅ 7/29 正常運航再開", badgeClass: "ok-badge-ap",
         row1: "✅ <strong>安全點檢完成，7/29 起恢復運航！</strong>",
         row2: "各航空公司班機陸續恢復起降（部分班次仍有調整，詳見各航空官網）"
-      }
+      },
+      rail_yufuin: { cardClass: "suspended", badge: "⛔ 終日停駛", badgeClass: "suspended-badge", row1Label: "運行狀況", row1Val: "博多 ↔ 由布院 終日停駛（久大本線巡檢中）", row1Class: "suspended-text", row2Label: "路線", row2Val: "久大本線（博多 - 由布院 - 大分）", row2Class: "warn-text", row3Label: "再開預定", row3Val: "7/30 起恢復營運", row3Class: "ok-text" }
     }
   },
 
@@ -142,7 +143,8 @@ const SCENARIOS = {
       rail_hohi: { cardClass: "suspended", badge: "⛔ 部分停駛", badgeClass: "suspended-badge", row1Label: "停駛區間", row1Val: "肥後大津 ↔ 豐後竹田（持續停駛）", row1Class: "suspended-text", row2Label: "復駛區間", row2Val: "熊本 ↔ 肥後大津（已恢復）", row2Class: "ok-text", row3Label: "特急列車", row3Val: "九州橫斷特急 終日停駛", row3Class: "suspended-text" },
       rail_atrain: { cardClass: "suspended", badge: "⛔ 停駛", badgeClass: "suspended-badge", row1Label: "運行狀況", row1Val: "終日停駛（配合三角線檢修）", row1Class: "suspended-text", row2Label: "-", row2Val: "-", row3Label: "-", row3Val: "-" },
       rail_misumi: { cardClass: "suspended", badge: "⛔ 全線停駛", badgeClass: "suspended-badge", row1Label: "運行狀況", row1Val: "宇土 ↔ 三角 終日停駛（修復中）", row1Class: "suspended-text", row2Label: "影響", row2Val: "天草聯外鐵路中斷", row3Label: "替代", row3Val: "無替代運輸", row3Class: "warn-text" },
-      rail_tram: { cardClass: "recovered", badge: "✅ 正常運行", badgeClass: "tram-badge", row1Label: "A系統", row1Val: "正常運行", row1Class: "ok-text", row2Label: "B系統", row2Val: "正常運行", row2Class: "ok-text", row3Label: "-", row3Val: "-" }
+      rail_tram: { cardClass: "recovered", badge: "✅ 正常運行", badgeClass: "tram-badge", row1Label: "A系統", row1Val: "正常運行", row1Class: "ok-text", row2Label: "B系統", row2Val: "正常運行", row2Class: "ok-text", row3Label: "-", row3Val: "-" },
+      rail_yufuin: { cardClass: "recovered", badge: "✅ 恢復運行", badgeClass: "ok-badge-ap", row1Label: "運行狀況", row1Val: "博多 ↔ 由布院 / 大分 按表定正常發車", row1Class: "ok-text", row2Label: "注意事項", row2Val: "久大本線安全點檢完成，指定席正常預約", row2Class: "ok-text", row3Label: "7/30 狀態", row3Val: "按表定正常發車", row3Class: "ok-text" }
     }
   },
 
@@ -213,7 +215,8 @@ const SCENARIOS = {
       rail_hohi: { cardClass: "recovered", badge: "✅ 全線正常", badgeClass: "recovered-badge", row1Label: "運行狀況", row1Val: "全線恢復通車", row1Class: "ok-text", row2Label: "特急列車", row2Val: "正常運行", row2Class: "ok-text", row3Label: "-", row3Val: "-" },
       rail_atrain: { cardClass: "recovered", badge: "✅ 正常運行", badgeClass: "recovered-badge", row1Label: "運行狀況", row1Val: "恢復正常排班", row1Class: "ok-text", row2Label: "-", row2Val: "-", row3Label: "-", row3Val: "-" },
       rail_misumi: { cardClass: "recovered", badge: "✅ 全線正常", badgeClass: "recovered-badge", row1Label: "運行狀況", row1Val: "全線修復完畢，恢復通車", row1Class: "ok-text", row2Label: "-", row2Val: "-", row3Label: "-", row3Val: "-" },
-      rail_tram: { cardClass: "recovered", badge: "✅ 正常運行", badgeClass: "tram-badge", row1Label: "A/B系統", row1Val: "正常運行", row1Class: "ok-text", row2Label: "-", row2Val: "-", row3Label: "-", row3Val: "-" }
+      rail_tram: { cardClass: "recovered", badge: "✅ 正常運行", badgeClass: "tram-badge", row1Label: "A/B系統", row1Val: "正常運行", row1Class: "ok-text", row2Label: "-", row2Val: "-", row3Label: "-", row3Val: "-" },
+      rail_yufuin: { cardClass: "recovered", badge: "✅ 全線正常", badgeClass: "recovered-badge", row1Label: "運行狀況", row1Val: "按表定正常營運", row1Class: "ok-text", row2Label: "備註", row2Val: "觀光特急列車指定席正常開放", row2Class: "ok-text", row3Label: "-", row3Val: "-" }
     }
   }
 };

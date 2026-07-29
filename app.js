@@ -258,26 +258,21 @@ async function loadJRKyushuAnnouncements() {
     let links = Array.from(linksMap.entries()).map(([url, text]) => ({ url, text }));
     if (links.length === 0) links = JR_FALLBACK;
 
-    // Build inline content summary for each PDF
+    // Build clean announcement links (no duplicate table)
     container.innerHTML = links.map(l => {
       let badge = backendSettings.dualVerify ? '<span class="verified-badge">✅ 官方發布比對無誤</span>' : '';
-      return `<div style="margin-bottom:16px; background:rgba(255,50,50,0.04); border:1px solid rgba(255,50,50,0.15); border-radius:10px; padding:14px;">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
-          <span style="color:var(--red); font-weight:bold; font-size:.95rem;">📄 ${esc(l.text)}</span>
-          ${badge}
-          <a href="${l.url}" target="_blank" rel="noopener" style="color:var(--txt2); font-size:.75rem; text-decoration:underline; margin-left:auto;">開啟原始 PDF ↗</a>
-        </div>
-        ${renderJRContentSummary()}
-      </div>`;
+      return `<a href="${l.url}" target="_blank" rel="noopener" style="text-decoration:none; color:var(--red); font-weight:bold; font-size:.95rem; display:flex; align-items:center; gap:8px; padding:10px 14px; background:rgba(255,50,50,0.06); border:1px solid rgba(255,50,50,0.18); border-radius:8px; margin-bottom:6px;">
+        📄 ${esc(l.text)} ${badge}
+        <span style="color:var(--txt2); font-size:.75rem; text-decoration:underline; margin-left:auto;">開啟 PDF ↗</span>
+      </a>`;
     }).join('');
   } catch(e) {
     console.warn('JR Kyushu fetch error', e);
     if (typeof JR_FALLBACK !== 'undefined') {
-      container.innerHTML = JR_FALLBACK.map(l => `<div style="margin-bottom:12px; padding:14px; background:rgba(255,50,50,0.04); border:1px solid rgba(255,50,50,0.15); border-radius:10px;">
-        <span style="color:var(--red); font-weight:bold;">📄 ${esc(l.text)}</span>
-        <a href="${l.url}" target="_blank" rel="noopener" style="color:var(--txt2); font-size:.75rem; text-decoration:underline; margin-left:12px;">開啟原始 PDF ↗</a>
-        ${renderJRContentSummary()}
-      </div>`).join('');
+      container.innerHTML = JR_FALLBACK.map(l => `<a href="${l.url}" target="_blank" rel="noopener" style="text-decoration:none; color:var(--red); font-weight:bold; font-size:.95rem; display:flex; align-items:center; gap:8px; padding:10px 14px; background:rgba(255,50,50,0.06); border:1px solid rgba(255,50,50,0.18); border-radius:8px; margin-bottom:6px;">
+        📄 ${esc(l.text)}
+        <span style="color:var(--txt2); font-size:.75rem; text-decoration:underline; margin-left:auto;">開啟 PDF ↗</span>
+      </a>`).join('');
     }
   } finally {
     setLoading('jrLoadingIndicator', false);
@@ -555,7 +550,7 @@ function updateScenarioData() {
 
   // Transport
   if (s.transport) {
-    ['shinkansen_kyushu', 'rail_kagoshima', 'rail_hohi', 'rail_atrain', 'rail_misumi', 'rail_tram'].forEach(id => {
+    ['shinkansen_kyushu', 'rail_kagoshima', 'rail_hohi', 'rail_atrain', 'rail_misumi', 'rail_tram', 'rail_yufuin'].forEach(id => {
       const sh = s.transport[id];
       if (sh) {
         const el = document.getElementById(id);
