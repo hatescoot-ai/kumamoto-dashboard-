@@ -974,7 +974,11 @@
       </div>
     </div>
 
-    <h3 class="feed-title" style="margin:1.2rem 0 .6rem">🌏 日本氣象廳(JMA) 即時地震資料（熊本周邊）<span class="loading-indicator" id="jmaLoadingIndicator"></span></h3>
+    <h3 class="feed-title" style="margin:1.2rem 0 .6rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      🌏 日本氣象廳 (JMA) 即時地震資料（熊本周邊）
+      <a href="https://www.jma.go.jp/bosai/quake/" target="_blank" rel="noopener" style="color:var(--txt2); font-size:0.8rem; text-decoration:underline; font-weight:normal; margin-left:auto;">資料來源：日本氣象廳 (JMA) 官網 ↗</a>
+      <span class="loading-indicator" id="jmaLoadingIndicator"></span>
+    </h3>
     <div class="usgs-table-wrapper">
       <table class="usgs-table">
         <thead><tr><th>時間（JST）</th><th>地點</th><th>最大震度</th><th>規模</th></tr></thead>
