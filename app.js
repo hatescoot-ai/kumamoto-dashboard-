@@ -282,7 +282,7 @@ async function loadJMA() {
   setLoading('jmaLoadingIndicator', true);
   const tbody = document.getElementById('jmaTableBody');
   try {
-    const d = await safeFetchJSON(JMA_URL, 10000);
+    const d = await safeFetchJSON('https://www.jma.go.jp/bosai/quake/data/list.json', 5000);
     
     let features = [];
     if (d && Array.isArray(d)) {
