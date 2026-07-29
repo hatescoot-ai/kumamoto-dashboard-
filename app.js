@@ -302,11 +302,19 @@ function updateRealtimeClocks() {
     const jstStr = formatTimeZone('Asia/Tokyo', 9);
     const tstStr = formatTimeZone('Asia/Taipei', 8);
 
-    const jstEl = document.getElementById('jstClock');
-    const tstEl = document.getElementById('tstClock');
+    const jstEl  = document.getElementById('jstClock');
+    const tstEl  = document.getElementById('tstClock');
+    const jstEl2 = document.getElementById('jstClock2');
+    const tstEl2 = document.getElementById('tstClock2');
+    const jstD   = document.getElementById('jstClockDesktop');
+    const tstD   = document.getElementById('tstClockDesktop');
 
-    if (jstEl) jstEl.textContent = jstStr;
-    if (tstEl) tstEl.textContent = tstStr;
+    if (jstEl)  jstEl.textContent  = jstStr;
+    if (tstEl)  tstEl.textContent  = tstStr;
+    if (jstEl2) jstEl2.textContent = jstStr;
+    if (tstEl2) tstEl2.textContent = tstStr;
+    if (jstD)   jstD.textContent   = jstStr;
+    if (tstD)   tstD.textContent   = tstStr;
   } catch (err) {
     console.error('Clock error:', err);
   }
