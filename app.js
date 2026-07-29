@@ -135,17 +135,94 @@ function stampTime() {
   if (ft) ft.textContent = `資料最後更新：${s}（台北時間）· 自動每5分鐘更新`;
 }
 
+/* ─── CROSS-SOURCE DEDUPLICATION & SYNTHESIS ─── */
+function deduplicateAndSynthesizeNews(items) {
+  if (!Array.isArray(items) || !items.length) return [];
+
+  const groups = [];
+
+  items.forEach(item => {
+    if (!item || !item.title) return;
+    const normTitle = item.title.replace(/[\s\t\r\n\【\】\「\」\(\)（）\-\_\:\：]/g, '').toLowerCase();
+
+    // Check similarity with existing groups
+    let foundGroup = null;
+    for (const group of groups) {
+      const gNorm = group.primaryTitle.replace(/[\s\t\r\n\【\】\「\」\(\)（）\-\_\:\：]/g, '').toLowerCase();
+
+      // Calculate simple character overlap similarity
+      let matches = 0;
+      const minLen = Math.min(normTitle.length, gNorm.length);
+      for (let i = 0; i < minLen; i++) {
+        if (normTitle[i] === gNorm[i]) matches++;
+      }
+      
+      const isSimilar = (normTitle.includes(gNorm.slice(0, 8))) || 
+                        (gNorm.includes(normTitle.slice(0, 8))) || 
+                        (matches / Math.max(1, minLen) > 0.65);
+
+      if (isSimilar) {
+        foundGroup = group;
+        break;
+      }
+    }
+
+    if (foundGroup) {
+      // Merge sources
+      if (item.source && !foundGroup.sources.includes(item.source)) {
+        foundGroup.sources.push(item.source);
+      }
+      // Merge tags
+      (item.tags || []).forEach(t => {
+        if (!foundGroup.tags.includes(t)) foundGroup.tags.push(t);
+      });
+      // Keep longest/richest summary
+      if (item.summary && (!foundGroup.summary || item.summary.length > foundGroup.summary.length)) {
+        foundGroup.summary = item.summary;
+      }
+      // Keep earliest time
+      if (item.time && !foundGroup.time) foundGroup.time = item.time;
+    } else {
+      groups.push({
+        primaryTitle: item.title,
+        sources: item.source ? [item.source] : ['跨網路資料源'],
+        time: item.time || '',
+        summary: item.summary || '',
+        tags: item.tags || ['news'],
+        url: item.url || '#'
+      });
+    }
+  });
+
+  // Transform synthesized groups back to news items
+  return groups.map(g => {
+    let combinedSource = g.sources.join(' / ');
+    if (g.sources.length > 1) {
+      combinedSource += ' <span class="verified-badge">✅ 跨來源比對彙整</span>';
+    }
+    return {
+      title: g.primaryTitle,
+      time: g.time,
+      source: combinedSource,
+      summary: g.summary,
+      tags: g.tags,
+      url: g.url
+    };
+  });
+}
+
 /* ─── NEWS RENDER ─── */
 function renderNews(id, items) {
   const el = document.getElementById(id);
   if (!el) return;
-  if (!items?.length) { el.innerHTML = '<p style="color:var(--txt3);font-size:.78rem;padding:.5rem">暫無最新消息</p>'; return; }
-  el.innerHTML = items.map(n => {
-    let sourceHtml = esc(n.source||'');
+  
+  const synthesized = deduplicateAndSynthesizeNews(items);
+  if (!synthesized?.length) { el.innerHTML = '<p style="color:var(--txt3);font-size:.78rem;padding:.5rem">暫無最新消息</p>'; return; }
+
+  el.innerHTML = synthesized.map(n => {
+    let sourceHtml = n.source || '';
     if (backendSettings.dualVerify && !sourceHtml.includes('verified-badge')) {
       sourceHtml += ' <span class="verified-badge">✅ 台日雙重確認</span>';
-    } else if (n.source && n.source.includes('verified-badge')) {
-      sourceHtml = n.source; // Keep HTML if it already contains the badge
     }
     return `
     <a class="news-item" href="${n.url||'#'}" target="_blank" rel="noopener">
