@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=3.0"/>
+  <link rel="stylesheet" href="style.css?v=3.5"/>
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
@@ -80,13 +80,7 @@
     </div>
   </div>
   <div class="status-bar">
-    <div class="sitem"><span class="sdot live"></span><span id="lastUpdateText">載入中...</span></div>
-    <div class="sitem"><span class="sdot ok"></span><span>✅ 海嘯注意報：18:10 已全面解除（JMA官方）</span></div>
-    <div class="sitem"><span class="sdot danger"></span><span>九州新幹線全線停擺</span></div>
-    <div class="sitem"><span class="sdot ok"></span><span>西九州新幹線 17:55 已再開</span></div>
-    <div class="sitem"><span class="sdot purple"></span><span>🚨 駐福岡辦事處急難：<a href="tel:+819019820010" style="color:inherit;text-decoration:underline">+81-90-1982-0010</a>（日本撥 090-1982-0010）</span></div>
-    <div class="sitem"><span class="sdot purple"></span><span>📞 辦事處電話：<a href="tel:+81927342810" style="color:inherit;text-decoration:underline">+81-92-734-2810</a></span></div>
-    <div class="sitem"><span class="sdot purple"></span><span>📞 外交部旅外救助：<a href="tel:0800085095" style="color:inherit;text-decoration:underline">0800-085-095</a></span></div>
+    <div class="sitem"><span class="sdot live"></span><span id="lastUpdateText">最後更新：載入中...</span></div>
   </div>
   <!-- NAV TABS -->
   <nav class="main-nav">
@@ -417,6 +411,51 @@
           <a href="https://www.nishitetsu.jp/bus/highwaybus/" target="_blank" rel="noopener" class="bus-link">西鐵巴士 →</a>
           <a href="https://www.kyusanko.co.jp/sankobus/" target="_blank" rel="noopener" class="bus-link">九州産交 →</a>
           <a href="https://www.ibus.co.jp/" target="_blank" rel="noopener" class="bus-link">いわさきバス →</a>
+        </div>
+      </div>
+
+      <!-- 一般公路（國道與省道/縣道） -->
+      <div class="road-card">
+        <h3 class="road-card-title">🛣️ 一般公路（國道・主要地方道）</h3>
+        <div class="road-list">
+          <div class="road-item warning-rd">
+            <span class="rd-icon">⚠️</span>
+            <div>
+              <div class="rd-title">國道 57 號（熊本 ↔ 阿蘇 ↔ 大分）</div>
+              <div class="rd-desc"><strong>阿蘇長陽大橋・Milk Road 替代道路</strong> 巡檢與落石預警管制（國土交通省公告）</div>
+            </div>
+            <span class="rd-badge warning-badge-sm">落石注意</span>
+          </div>
+          <div class="road-item warning-rd">
+            <span class="rd-icon">⚠️</span>
+            <div>
+              <div class="rd-title">國道 3 號（福岡 ↔ 熊本 ↔ 八代）</div>
+              <div class="rd-desc"><strong>南北縱貫主要幹線</strong> 部分路段車流擁塞，防汛與路面巡檢中</div>
+            </div>
+            <span class="rd-badge warning-badge-sm">巡檢中</span>
+          </div>
+          <div class="road-item warning-rd">
+            <span class="rd-icon">⚠️</span>
+            <div>
+              <div class="rd-title">國道 218 號（熊本 ↔ 高千穗 ↔ 延岡）</div>
+              <div class="rd-desc"><strong>山區觀光幹道</strong> 山崩高風險區段，夜間管制與安全巡查</div>
+            </div>
+            <span class="rd-badge warning-badge-sm">管制中</span>
+          </div>
+          <div class="road-item ok-rd">
+            <span class="rd-icon">🔍</span>
+            <div>
+              <div class="rd-title">國道 443 號（益城町 / 御船町）</div>
+              <div class="rd-desc"><strong>震央周邊主要道路</strong> 橋梁及伸縮縫點檢完成，車輛請減速慢行</div>
+            </div>
+            <span class="rd-badge ok-badge-sm">點檢完成</span>
+          </div>
+        </div>
+        <p class="road-note">💡 即時路況與防災門戶官網連結：</p>
+        <div class="bus-links">
+          <a href="https://www.c-ihighway.jp/pcsite/map?area=area09" target="_blank" rel="noopener" class="bus-link">iHighway 九州路網圖 (c-ihighway) →</a>
+          <a href="https://ihighway.jp/pcsite/map/?area=area09" target="_blank" rel="noopener" class="bus-link">iHighway 九州路況 (ihighway) →</a>
+          <a href="https://www.mlit.go.jp/river/bousai/bousai-portal/tw/index.html" target="_blank" rel="noopener" class="bus-link">國土交通省 防災門戶 (繁中) →</a>
         </div>
       </div>
     </div>
@@ -970,7 +1009,10 @@
         <a href="https://www.jma.go.jp/" target="_blank" rel="noopener">日本氣象廳 JMA</a>
         <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a>
         <a href="https://api.p2pquake.net/" target="_blank" rel="noopener">P2P地震情報</a>
-        <a href="https://www.jrkyushu.co.jp/" target="_blank" rel="noopener">JR九州</a>
+        <a href="https://www.jrkyushu.co.jp/" target="_blank" rel="noopener">JR九州 官網</a>
+        <a href="https://www.c-ihighway.jp/pcsite/map?area=area09" target="_blank" rel="noopener">iHighway 九州地圖 (c-ihighway)</a>
+        <a href="https://ihighway.jp/pcsite/map/?area=area09" target="_blank" rel="noopener">iHighway 九州路況 (ihighway)</a>
+        <a href="https://www.mlit.go.jp/river/bousai/bousai-portal/tw/index.html" target="_blank" rel="noopener">國土交通省 防災門戶 (繁中)</a>
         <a href="https://www.kumamoto-airport.co.jp/zh-TW/" target="_blank" rel="noopener">阿蘇熊本機場 (繁中)</a>
         <a href="https://kyushu-traveltips.com/zh-hant/safety-tips/" target="_blank" rel="noopener">九州 Safety Tips (繁中)</a>
         <a href="https://www.fukuoka-airport.co.jp/" target="_blank" rel="noopener">福岡機場</a>
@@ -985,6 +1027,6 @@
   </div>
 </footer>
 
-<script src="app.js?v=3.0"></script>
+<script src="app.js?v=3.5"></script>
 </body>
 </html>
