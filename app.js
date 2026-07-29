@@ -691,6 +691,22 @@ document.addEventListener('DOMContentLoaded', () => {
   clearInterval(refreshInterval);
   refreshInterval = setInterval(fetchAllData, REFRESH_MS);
 
+  // Secret admin access: triple-click the ⚠ alert badge to open settings
+  let _adminClicks = 0, _adminTimer = null;
+  const alertBadge = document.querySelector('.alert-badge');
+  if (alertBadge) {
+    alertBadge.style.cursor = 'default'; // no pointer hint
+    alertBadge.addEventListener('click', () => {
+      _adminClicks++;
+      clearTimeout(_adminTimer);
+      if (_adminClicks >= 3) {
+        _adminClicks = 0;
+        toggleSettingsModal();
+      }
+      _adminTimer = setTimeout(() => { _adminClicks = 0; }, 800);
+    });
+  }
+
   console.log('[熊本地震資訊總覽 v2] 初始化完成，每5分鐘自動更新。');
 });
 
