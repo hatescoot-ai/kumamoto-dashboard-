@@ -129,6 +129,37 @@ function setRefreshing(on) {
   document.getElementById('refreshIcon')?.classList.toggle('spin', on);
 }
 
+/* ─── ANTI-BOT & CORS PROXY ROTATION FETCH ─── */
+async function safeFetchJSON(url, timeoutMs = 10000) {
+  const separator = url.includes('?') ? '&' : '?';
+  const targetUrl = `${url}${separator}_t=${Date.now()}`;
+
+  // 1. Direct fetch with cache buster
+  try {
+    const res = await fetch(targetUrl, { signal: AbortSignal.timeout(timeoutMs), cache: 'no-cache' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data) return data;
+    }
+  } catch (e) {
+    console.warn('[防擋爬蟲] 直連 API 被擋或連線超時，自動切換至 CORS/Anti-bot 備用源：', url);
+  }
+
+  // 2. Fallback to AllOrigins proxy
+  try {
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+    const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(timeoutMs), cache: 'no-cache' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data) return data;
+    }
+  } catch (e) {
+    console.warn('[防擋爬蟲] 備用源請求失敗：', e);
+  }
+
+  return null;
+}
+
 /* ─── USGS ─── */
 async function loadUSGS() {
   setLoading('usgsLoadingIndicator', true);
@@ -136,9 +167,8 @@ async function loadUSGS() {
   try {
     const start = new Date(Date.now() - 7 * 864e5).toISOString();
     const url = `${USGS_URL}?format=geojson&starttime=${start}&minmagnitude=4.5&latitude=32.8&longitude=130.7&maxradiuskm=350&orderby=time&limit=25`;
-    const r = await fetch(url, { signal: AbortSignal.timeout(12000) });
-    const d = await r.json();
-    if (!d.features?.length) { tbody.innerHTML='<tr><td colspan="4" class="loading-text">暫無資料</td></tr>'; return; }
+    const d = await safeFetchJSON(url, 10000);
+    if (!d?.features?.length) { tbody.innerHTML='<tr><td colspan="4" class="loading-text">暫無資料</td></tr>'; return; }
     tbody.innerHTML = d.features.map(f => {
       const p = f.properties, m = (p.mag||0).toFixed(1), dep = Math.round(f.geometry.coordinates[2]||0);
       const mc = p.mag >= 6.5 ? 'mag-high' : p.mag >= 5.5 ? 'mag-mid' : 'mag-low';
@@ -163,8 +193,7 @@ const EQ_FALLBACK = [
 async function loadP2P() {
   setLoading('eqLoadingIndicator', true);
   try {
-    const r = await fetch(P2P_URL, { signal: AbortSignal.timeout(9000) });
-    const data = await r.json();
+    const data = await safeFetchJSON(P2P_URL, 9000);
     if (!Array.isArray(data) || !data.length) { renderNews('earthquakeNewsFeed', EQ_FALLBACK); return; }
     const p2pItems = data.filter(x=>x.earthquake).slice(0,6).map(x => {
       const eq=x.earthquake, h=eq.hypocenter||{};
@@ -176,19 +205,6 @@ async function loadP2P() {
     const all = [...EQ_FALLBACK, ...p2pItems];
     const seen = new Set();
     renderNews('earthquakeNewsFeed', all.filter(x=>{ const k=x.title.slice(0,16); if(seen.has(k))return false; seen.add(k); return true; }).slice(0,12));
-
-    // Auto-add P2P updates to airline history for context
-    if (p2pItems.length > 0) {
-      const latest = p2pItems[0];
-      ['ci','br','jx','it'].forEach(a => {
-        const h = loadHistory();
-        // Only add if new (check last ts)
-        const last = h[a]?.[0];
-        if (!last || last.content !== `[自動] 地震更新：${latest.title}`) {
-          // Don't auto-spam history, only add if magnitude >= 5
-        }
-      });
-    }
   } catch(e) {
     console.warn('P2P error', e);
     renderNews('earthquakeNewsFeed', EQ_FALLBACK);
@@ -199,9 +215,8 @@ async function loadP2P() {
 async function loadGdelt(query, newsId, tags, fallback) {
   try {
     const url = `${GDELT_URL}?query=${encodeURIComponent(query)}&mode=artlist&maxrecords=8&sort=datedesc&format=json`;
-    const r = await fetch(url, { signal: AbortSignal.timeout(12000) });
-    const d = await r.json();
-    if (!d.articles?.length) { renderNews(newsId, fallback); return; }
+    const d = await safeFetchJSON(url, 10000);
+    if (!d?.articles?.length) { renderNews(newsId, fallback); return; }
     const items = d.articles.slice(0,8).map(a => ({
       title: a.title||'（無標題）',
       time: a.seendate ? (() => { try { return new Date(a.seendate.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,'$1-$2-$3T$4:$5:$6Z')).toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}); } catch(e){ return ''; } })() : '',
