@@ -240,6 +240,7 @@ h1 { font-size:1.6rem; font-weight:900; letter-spacing:-.02em; line-height:1.1; 
 .shinkansen.west { background:linear-gradient(135deg,#006644,#003322); }
 .local-line { background:linear-gradient(135deg,#444,#222); color:#fff; }
 .tram-badge { background:linear-gradient(135deg,#006633,#004422); color:#fff; }
+.express-line { background:linear-gradient(135deg,#990033,#660022); color:#fff; }
 
 .rail-title-block { flex:1; }
 .rail-title-block h3 { font-size:.98rem; font-weight:800; margin-bottom:.2rem; }

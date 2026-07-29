@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=5.0"/>
+  <link rel="stylesheet" href="style.css?v=5.1"/>
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
@@ -110,16 +110,16 @@
           <h3>九州新幹線（みずほ・さくら・つばめ）</h3>
           <span class="rail-route">博多 ─ 熊本 ─ 鹿兒島中央</span>
         </div>
-        <span class="rail-status-badge suspended-badge">⛔ 全線停擺</span>
+        <span class="rail-status-badge suspended-badge">⛔ 全線停駛</span>
       </div>
       <div class="rail-detail-grid">
         <div class="rail-detail-item">
           <span class="rdi-label">停駛區間</span>
-          <span class="rdi-val suspended-text">博多 ↔ 鹿兒島中央 全線（7/28終日）</span>
+          <span class="rdi-val suspended-text">博多 ↔ 熊本（始發起）、熊本 ↔ 鹿兒島中央（終日）</span>
         </div>
         <div class="rail-detail-item">
           <span class="rdi-label">7/29 運行</span>
-          <span class="rdi-val suspended-text">始發起全線繼續停駛，設備點檢中（JR九州官方公告）</span>
+          <span class="rdi-val suspended-text">因線路與設備點檢，全線停駛（JR九州 7/29 08:00 公告）</span>
         </div>
         <div class="rail-detail-item">
           <span class="rdi-label">再開時間</span>
@@ -192,20 +192,20 @@
           <h3>鹿兒島本線</h3>
           <span class="rail-route">門司港 ─ 博多 ─ 熊本 ─ 鹿兒島中央</span>
         </div>
-        <span class="rail-status-badge suspended-badge">⛔ 全線停駛</span>
+        <span class="rail-status-badge suspended-badge">⛔ 部分停駛</span>
       </div>
       <div class="rail-detail-grid">
         <div class="rail-detail-item">
-          <span class="rdi-label">終日運休區間</span>
-          <span class="rdi-val suspended-text">大牟田 ↔ 八代 全線（JR九州公告）</span>
+          <span class="rdi-label">停駛區間</span>
+          <span class="rdi-val suspended-text">荒尾 ↔ 八代（始發起停駛）</span>
         </div>
         <div class="rail-detail-item">
-          <span class="rdi-label">北部（博多↔大牟田）</span>
-          <span class="rdi-val warn-text">安全確認後、順次再開の見込み</span>
+          <span class="rdi-label">減班區間</span>
+          <span class="rdi-val warn-text">鳥栖 ↔ 荒尾（本数を減らして運行）</span>
         </div>
         <div class="rail-detail-item">
           <span class="rdi-label">再開預定</span>
-          <span class="rdi-val warn-text">未定（7/29も引き続き運休）</span>
+          <span class="rdi-val warn-text">未定（線路與設備點檢中）</span>
         </div>
       </div>
       <a href="https://www.jrkyushu.co.jp/railway/index.html" target="_blank" rel="noopener" class="official-link">JR九州 官方運行情報 →</a>
@@ -219,43 +219,39 @@
           <h3>豐肥本線（阿蘇横断鐵道）</h3>
           <span class="rail-route">熊本 ─ 阿蘇 ─ 大分</span>
         </div>
-        <span class="rail-status-badge suspended-badge">⛔ 全線停駛</span>
+        <span class="rail-status-badge suspended-badge">⛔ 大部分停駛</span>
       </div>
       <div class="rail-detail-grid">
         <div class="rail-detail-item">
-          <span class="rdi-label">終日運休</span>
-          <span class="rdi-val suspended-text">熊本 ↔ 肥後大津、肥後大津 ↔ 宮地（JR九州公告）</span>
+          <span class="rdi-label">停駛區間</span>
+          <span class="rdi-val suspended-text">熊本 ↔ 豐後竹田（始發起停駛）</span>
         </div>
         <div class="rail-detail-item">
-          <span class="rdi-label">宮地以東</span>
-          <span class="rdi-val warn-text">運行状況確認中</span>
+          <span class="rdi-label">減班區間</span>
+          <span class="rdi-val warn-text">豐後竹田 ↔ 大分（本数を減らして運行）</span>
         </div>
         <div class="rail-detail-item">
-          <span class="rdi-label">影響</span>
-          <span class="rdi-val">阿蘇地區鐵路交通全面中斷，7/29亦持續停駛</span>
+          <span class="rdi-label">特急列車</span>
+          <span class="rdi-val suspended-text">九州橫斷特急、あそぼーい！始發起停駛</span>
         </div>
       </div>
       <a href="https://www.jrkyushu.co.jp/railway/index.html" target="_blank" rel="noopener" class="official-link">JR九州 官方運行情報 →</a>
     </div>
 
-    <!-- 三角線 -->
+    <!-- 特急 A列車で行こう -->
     <div class="rail-card suspended">
       <div class="rail-card-header">
-        <div class="rail-badge local-line">在來線</div>
+        <div class="rail-badge express-line">特急列車</div>
         <div class="rail-title-block">
-          <h3>長崎本線</h3>
-          <span class="rail-route">江北 ― 諸山 ― 諸渤 ― 諸漲 ― 諸山 ― 長崎</span>
+          <h3>特急 A列車で行こう</h3>
+          <span class="rail-route">熊本 ─ 三角</span>
         </div>
-        <span class="rail-status-badge suspended-badge">⛔ 部分停駛</span>
+        <span class="rail-status-badge suspended-badge">⛔ 停駛</span>
       </div>
       <div class="rail-detail-grid">
         <div class="rail-detail-item">
-          <span class="rdi-label">終日運休</span>
-          <span class="rdi-val suspended-text">江北 ↔ 諸漲 （JR九州公告）</span>
-        </div>
-        <div class="rail-detail-item">
-          <span class="rdi-label">諸漲以西</span>
-          <span class="rdi-val ok-text">正常運行</span>
+          <span class="rdi-label">運行狀況</span>
+          <span class="rdi-val suspended-text">始發起停駛（線路與設備點檢中）</span>
         </div>
       </div>
       <a href="https://www.jrkyushu.co.jp/railway/index.html" target="_blank" rel="noopener" class="official-link">JR九州 官方運行情報 →</a>
@@ -273,12 +269,12 @@
       </div>
       <div class="rail-detail-grid">
         <div class="rail-detail-item">
-          <span class="rdi-label">終日運休</span>
-          <span class="rdi-val suspended-text">宇土 ↔ 三角 全線（JR九州公告）</span>
+          <span class="rdi-label">運行狀況</span>
+          <span class="rdi-val suspended-text">宇土 ↔ 三角 始發起停駛（JR九州公告）</span>
         </div>
         <div class="rail-detail-item">
           <span class="rdi-label">影響</span>
-          <span class="rdi-val">天草海隣單線，熊本市商港地區交通中斷</span>
+          <span class="rdi-val">天草海線單線，熊本市商港地區交通中斷</span>
         </div>
       </div>
       <a href="https://www.jrkyushu.co.jp/railway/index.html" target="_blank" rel="noopener" class="official-link">JR九州 官方運行情報 →</a>
@@ -1027,6 +1023,6 @@
   </div>
 </footer>
 
-<script src="app.js?v=5.0"></script>
+<script src="app.js?v=5.1"></script>
 </body>
 </html>
