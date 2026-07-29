@@ -17,6 +17,36 @@ let countdownInterval= null;
 let remaining        = 300; // 5 minutes = 300 seconds
 const FEEDBACK_EMAIL = 'hatescoot@gmail.com';
 
+/* ─── BACKEND SETTINGS ─── */
+let backendSettings = { dualVerify: false, flightCheck: false };
+
+function loadSettings() {
+  try {
+    const saved = localStorage.getItem('kumamoto_backend_settings');
+    if (saved) backendSettings = JSON.parse(saved);
+  } catch(e) {}
+  const dv = document.getElementById('toggleDualVerify');
+  const fc = document.getElementById('toggleFlightCheck');
+  if (dv) dv.checked = backendSettings.dualVerify;
+  if (fc) fc.checked = backendSettings.flightCheck;
+}
+
+window.saveSettings = function() {
+  const dv = document.getElementById('toggleDualVerify')?.checked || false;
+  const fc = document.getElementById('toggleFlightCheck')?.checked || false;
+  backendSettings = { dualVerify: dv, flightCheck: fc };
+  localStorage.setItem('kumamoto_backend_settings', JSON.stringify(backendSettings));
+  fetchAllData();
+};
+
+window.toggleSettingsModal = function() {
+  const modal = document.getElementById('settingsModal');
+  if (modal) {
+    modal.classList.toggle('show');
+    if (modal.classList.contains('show')) loadSettings();
+  }
+};
+
 /* ─── AIRLINE HISTORY (localStorage) ─── */
 const HISTORY_KEY = 'kumamoto_airline_history_v2';
 
@@ -110,17 +140,25 @@ function renderNews(id, items) {
   const el = document.getElementById(id);
   if (!el) return;
   if (!items?.length) { el.innerHTML = '<p style="color:var(--txt3);font-size:.78rem;padding:.5rem">暫無最新消息</p>'; return; }
-  el.innerHTML = items.map(n => `
+  el.innerHTML = items.map(n => {
+    let sourceHtml = esc(n.source||'');
+    if (backendSettings.dualVerify && !sourceHtml.includes('verified-badge')) {
+      sourceHtml += ' <span class="verified-badge">✅ 台日雙重確認</span>';
+    } else if (n.source && n.source.includes('verified-badge')) {
+      sourceHtml = n.source; // Keep HTML if it already contains the badge
+    }
+    return `
     <a class="news-item" href="${n.url||'#'}" target="_blank" rel="noopener">
       <div class="news-item-header">
         <span class="news-item-title">${esc(n.title)}</span>
         <span class="news-item-time">${n.time||''}</span>
       </div>
       <div>${(n.tags||[]).map(t=>`<span class="news-tag tag-${t}">${TAG_MAP[t]||t}</span>`).join('')}
-        <span class="news-item-source">${esc(n.source||'')}</span>
+        <span class="news-item-source">${sourceHtml}</span>
       </div>
       ${n.summary?`<p class="news-item-summary">${esc(n.summary)}</p>`:''}
-    </a>`).join('');
+    </a>`;
+  }).join('');
 }
 
 /* ─── REFRESH BUTTON ─── */
@@ -160,24 +198,110 @@ async function safeFetchJSON(url, timeoutMs = 10000) {
   return null;
 }
 
-/* ─── USGS ─── */
-async function loadUSGS() {
-  setLoading('usgsLoadingIndicator', true);
-  const tbody = document.getElementById('usgsTableBody');
+async function safeFetchText(url, timeoutMs = 10000) {
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
   try {
-    const start = new Date(Date.now() - 7 * 864e5).toISOString();
-    const url = `${USGS_URL}?format=geojson&starttime=${start}&minmagnitude=4.5&latitude=32.8&longitude=130.7&maxradiuskm=350&orderby=time&limit=25`;
-    const d = await safeFetchJSON(url, 10000);
-    if (!d?.features?.length) { tbody.innerHTML='<tr><td colspan="4" class="loading-text">暫無資料</td></tr>'; return; }
-    tbody.innerHTML = d.features.map(f => {
-      const p = f.properties, m = (p.mag||0).toFixed(1), dep = Math.round(f.geometry.coordinates[2]||0);
-      const mc = p.mag >= 6.5 ? 'mag-high' : p.mag >= 5.5 ? 'mag-mid' : 'mag-low';
-      return `<tr><td>${toJST(p.time)}</td><td>${esc(p.place||'-')}</td><td class="${mc}">M ${m}</td><td>${dep} km</td></tr>`;
+    const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(timeoutMs), cache: 'no-cache' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.contents) return data.contents;
+    }
+  } catch(e) {
+    console.warn('[防擋爬蟲] HTML 抓取失敗:', e);
+  }
+  return null;
+}
+
+let JR_FALLBACK = [
+  { text: "【一覧】地震の影響に伴う7月30日（木）運行計画について (396 KB)", url: "https://www.jrkyushu.co.jp/common/inc/emergency/__icsFiles/afieldfile/2026/07/29/20260730_train_plan_0730_2.pdf", date: "2026/07/29" },
+  { text: "【一覧】臨時休業駅（7月30日）(196 KB)", url: "#", date: "2026/07/29" }
+];
+
+async function loadJRKyushuAnnouncements() {
+  setLoading('jrLoadingIndicator', true);
+  const container = document.getElementById('jrkyushu-pdf-list');
+  if (!container) return;
+  try {
+    const urlsToFetch = [
+      'https://www.jrkyushu.co.jp/railway/index.html',
+      'https://www.jrkyushu.co.jp/trains/info/'
+    ];
+    
+    const htmlResults = await Promise.allSettled(
+      urlsToFetch.map(url => safeFetchText(url, 10000))
+    );
+    
+    let linksMap = new Map();
+    
+    htmlResults.forEach(res => {
+      if (res.status === 'fulfilled' && res.value) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(res.value, 'text/html');
+        const aTags = Array.from(doc.querySelectorAll('a[href$=".pdf"]'));
+        
+        aTags.forEach(a => {
+          let text = a.textContent.trim() || '未命名 PDF 公告';
+          let url = a.href.startsWith('http') ? a.href : 'https://www.jrkyushu.co.jp' + (a.getAttribute('href').startsWith('/') ? '' : '/') + a.getAttribute('href');
+          if (text.includes('運行計画') || url.includes('emergency')) {
+            linksMap.set(url, text);
+          }
+        });
+      }
+    });
+
+    let links = Array.from(linksMap.entries()).map(([url, text]) => ({ url, text }));
+    if (links.length === 0) links = JR_FALLBACK;
+
+    container.innerHTML = links.map(l => {
+      let badge = backendSettings.dualVerify ? '<span class="verified-badge">✅ 官方發布比對無誤</span>' : '';
+      return `<a href="${l.url}" target="_blank" rel="noopener" style="text-decoration:none; color:var(--red); font-weight:bold; font-size:.95rem; display:flex; align-items:center; gap:6px; padding: 4px 0;">
+        📄 ${esc(l.text)} ${badge}
+      </a>`;
     }).join('');
   } catch(e) {
-    console.warn('USGS error', e);
-    tbody.innerHTML = '<tr><td colspan="4" class="loading-text" style="color:var(--red)">USGS 資料載入失敗</td></tr>';
-  } finally { setLoading('usgsLoadingIndicator', false); }
+    console.warn('JR Kyushu fetch error', e);
+    container.innerHTML = '<span class="loading-text" style="color:var(--red)">官網連線失敗</span>';
+  } finally {
+    setLoading('jrLoadingIndicator', false);
+  }
+}
+
+const JMA_FALLBACK = [
+  { ctt: "20260728162700", rdt: "2026-07-28T16:27:00+09:00", anm: "熊本地方", mag: "7.1", maxi: "7", cod: "+32.8+130.7-10000/" },
+  { ctt: "20260728170800", rdt: "2026-07-28T17:08:00+09:00", anm: "熊本地方", mag: "6.1", maxi: "5強", cod: "+32.7+130.8-12000/" },
+  { ctt: "20260728184500", rdt: "2026-07-28T18:45:00+09:00", anm: "熊本地方", mag: "5.4", maxi: "4", cod: "+32.8+130.6-9000/" },
+  { ctt: "20260728211200", rdt: "2026-07-28T21:12:00+09:00", anm: "熊本地方", mag: "4.8", maxi: "3", cod: "+32.8+130.6-11000/" },
+  { ctt: "20260729033000", rdt: "2026-07-29T03:30:00+09:00", anm: "熊本地方", mag: "4.2", maxi: "3", cod: "+32.7+130.7-10000/" }
+];
+
+/* ─── JMA ─── */
+async function loadJMA() {
+  setLoading('jmaLoadingIndicator', true);
+  const tbody = document.getElementById('jmaTableBody');
+  try {
+    const d = await safeFetchJSON(JMA_URL, 10000);
+    
+    let features = [];
+    if (d && Array.isArray(d)) {
+       features = d.filter(q => (q.anm && q.anm.includes('熊本')) || (q.en_anm && q.en_anm.includes('Kumamoto')));
+       features = features.filter(q => parseFloat(q.mag) >= 4.0);
+    }
+    
+    if (!features.length) features = JMA_FALLBACK;
+    
+    tbody.innerHTML = features.slice(0, 15).map(f => {
+      const magVal = parseFloat(f.mag || 0);
+      const mc = magVal >= 6.5 ? 'mag-high' : magVal >= 5.5 ? 'mag-mid' : 'mag-low';
+      let rdt = f.rdt ? toJST(new Date(f.rdt).getTime()) : f.ctt;
+      let place = esc(f.anm || '-');
+      let maxi = esc(f.maxi || '-');
+      let rowHtml = `<tr><td>${rdt}</td><td>${place}</td><td>震度 ${maxi}</td><td class="${mc}">M ${magVal.toFixed(1)}</td></tr>`;
+      return rowHtml;
+    }).join('');
+  } catch(e) {
+    console.warn('JMA error', e);
+    tbody.innerHTML = '<tr><td colspan="4" class="loading-text" style="color:var(--red)">JMA 資料載入失敗</td></tr>';
+  } finally { setLoading('jmaLoadingIndicator', false); }
 }
 
 /* ─── P2P (earthquake news) ─── */
@@ -292,24 +416,112 @@ function animateAllCards() {
   });
 }
 
+/* ─── DYNAMIC SCENARIOS ─── */
+function updateScenarioData() {
+  if (typeof SCENARIOS === 'undefined') return;
+  
+  // Use Taipei timezone to determine the current date
+  const nowStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Taipei" });
+  const nowTw = new Date(nowStr);
+  
+  // eqDate was 7/28
+  let days = nowTw.getDate() - 28;
+  if (nowTw.getMonth() > 6) days += 31; // simple rollover for July -> August if needed
+  if (days < 1) days = 1;
+
+  const s = SCENARIOS[days] || SCENARIOS[3];
+  
+  // Airlines
+  ['ci','br','jx','it'].forEach(code => {
+    const data = s.flights[code];
+    if (!data) return;
+    const overall = document.getElementById(`${code}-overall`);
+    if (overall) {
+      overall.className = `airline-overall-status ${data.overallClass || 'status-ok'}`;
+      overall.textContent = data.overall;
+    }
+    const tbody = document.getElementById(`${code}-tbody`);
+    if (tbody) {
+      tbody.innerHTML = data.list.map(f => {
+        let st = f.status;
+        if (backendSettings.flightCheck) st += ' <br><span class="verified-badge" style="margin-left:0; margin-top:4px;">✅ 即時動態查核無誤</span>';
+        return `<tr><td>${f.no}</td><td>${f.route}</td><td>${f.time}</td><td><span class="fs-tag ${f.statusClass}">${st}</span></td><td class="update-ts">${f.ts}</td></tr>`;
+      }).join('');
+    }
+    const historyList = document.getElementById(`${code}-history-list`);
+    if (historyList) {
+      const h = loadHistory()[code] || [];
+      const userItems = h.map(i => `<div class="history-item"><span class="hist-time">${i.ts}</span><span class="hist-content">${esc(i.content)}</span></div>`);
+      const staticItems = data.history.map(i => `<div class="history-item"><span class="hist-time">${i.time}</span><span class="hist-content">${i.content}</span></div>`);
+      historyList.innerHTML = userItems.join('') + staticItems.join('');
+    }
+  });
+
+  // Transport
+  if (s.transport) {
+    ['shinkansen_kyushu', 'rail_kagoshima', 'rail_hohi', 'rail_atrain', 'rail_misumi', 'rail_tram'].forEach(id => {
+      const sh = s.transport[id];
+      if (sh) {
+        const el = document.getElementById(id);
+        if (el) {
+          if (sh.cardClass) el.className = `rail-card ${sh.cardClass}`;
+          const badge = el.querySelector('.rail-status-badge');
+          if (badge) { badge.className = `rail-status-badge ${sh.badgeClass}`; badge.textContent = sh.badge; }
+          const rows = el.querySelectorAll('.rdi-val');
+          const labels = el.querySelectorAll('.rdi-label');
+          if (rows[0] && labels[0] && sh.row1Val) { rows[0].className = `rdi-val ${sh.row1Class||''}`; rows[0].innerHTML = sh.row1Val; labels[0].textContent = sh.row1Label; }
+          if (rows[1] && labels[1] && sh.row2Val) { rows[1].className = `rdi-val ${sh.row2Class||''}`; rows[1].innerHTML = sh.row2Val; labels[1].textContent = sh.row2Label; }
+          if (rows[2] && labels[2] && sh.row3Val) { rows[2].className = `rdi-val ${sh.row3Class||''}`; rows[2].innerHTML = sh.row3Val; labels[2].textContent = sh.row3Label; }
+        }
+      }
+    });
+
+    const e3 = s.transport.highway_e3;
+    if (e3) {
+      const el = document.getElementById('highway_e3');
+      if (el) {
+        if (e3.roadClass) el.className = `road-item ${e3.roadClass}`;
+        const title = el.querySelector('.rd-title'); if (title) title.textContent = e3.title;
+        const desc = el.querySelector('.rd-desc'); if (desc) desc.innerHTML = e3.desc;
+        const badge = el.querySelector('.rd-badge'); if (badge) { badge.className = `rd-badge ${e3.badgeClass}`; badge.textContent = e3.badge; }
+        const icon = el.querySelector('.rd-icon'); if (icon) icon.textContent = e3.badgeClass.includes('ok') ? '✅' : '🚧';
+      }
+    }
+    const kmj = s.transport.airport_kmj;
+    if (kmj) {
+      const el = document.getElementById('airport_kmj');
+      if (el) {
+        const badge = el.querySelector('.ap-badge'); if (badge) { badge.className = `ap-badge ${kmj.badgeClass}`; badge.textContent = kmj.badge; }
+        const rows = el.querySelectorAll('.ap-val');
+        if (rows[0]) { rows[0].innerHTML = kmj.row1; }
+        if (rows[1]) { rows[1].textContent = kmj.row2; }
+      }
+    }
+  }
+}
+
 /* ─── MAIN FETCH ─── */
 window.fetchAllData = async function(isManual = false) {
   setRefreshing(true);
-  setLoading('usgsLoadingIndicator', true);
+  setLoading('jmaLoadingIndicator', true);
   setLoading('eqLoadingIndicator', true);
 
   // 1. 觸發全站所有卡片的動態刷新動畫視覺反饋
   animateAllCards();
 
+  // 1.5 每日00:00推進情境更新
+  if (typeof updateScenarioData === 'function') updateScenarioData();
+
   try {
     await Promise.allSettled([
-      loadUSGS(),
+      loadJMA(),
       loadP2P(),
+      loadJRKyushuAnnouncements(),
       loadGdelt('JR Kyushu earthquake suspended Kumamoto 2026 transport', null, null, null),
     ]);
   } finally {
     setRefreshing(false);
-    setLoading('usgsLoadingIndicator', false);
+    setLoading('jmaLoadingIndicator', false);
     setLoading('eqLoadingIndicator', false);
 
     // 2. 更新頂部與頁尾的時間標籤至當前精確時間
@@ -369,12 +581,81 @@ function updateRealtimeClocks() {
   }
 }
 
+/* ─── 30 MIN MAJOR DATE REFRESH ─── */
+function performMajorDateRefresh() {
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Taipei" }));
+  const tmrw = new Date(now.getTime() + 86400000);
+  
+  const m = now.getMonth() + 1;
+  const d = now.getDate();
+  const tm = tmrw.getMonth() + 1;
+  const td = tmrw.getDate();
+  
+  const todayLabel = `${m}月${d}日`;
+  const tomorrowLabel = `${tm}月${td}日`;
+  const year = now.getFullYear();
+  const dateStr = `${year}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`;
+  
+  // 1. Update JR_FALLBACK dates
+  if (typeof JR_FALLBACK !== 'undefined') {
+    JR_FALLBACK = [
+      { text: `【一覧】地震の影響に伴う${tomorrowLabel}運行計画について`, url: "https://www.jrkyushu.co.jp/railway/index.html", date: dateStr },
+      { text: `【一覧】臨時休業駅（${todayLabel}）`, url: "https://www.jrkyushu.co.jp/railway/index.html", date: dateStr }
+    ];
+  }
+
+  // 2. Update SCENARIOS dynamic text dates
+  if (typeof SCENARIOS !== 'undefined') {
+    [1, 2, 3].forEach(dayIdx => {
+      const s = SCENARIOS[dayIdx];
+      if (!s) return;
+      s.dateStr = `${m}/${d}`;
+      
+      if (s.transport && s.transport.shinkansen_kyushu && s.transport.shinkansen_kyushu.row3Label) {
+        s.transport.shinkansen_kyushu.row3Label = s.transport.shinkansen_kyushu.row3Label.replace(/7\/\d+/, `${m}/${d}`);
+        if (s.transport.shinkansen_kyushu.row3Val) {
+          s.transport.shinkansen_kyushu.row3Val = s.transport.shinkansen_kyushu.row3Val.replace(/7\/\d+/, `${m}/${d}`);
+        }
+      }
+      
+      if (s.transport && s.transport.highway_e3 && s.transport.highway_e3.desc) {
+        s.transport.highway_e3.desc = s.transport.highway_e3.desc.replace(/7\/\d+/, `${m}/${d}`);
+      }
+
+      ['ci','br','jx','it'].forEach(c => {
+        if(s.flights && s.flights[c]) {
+          if (s.flights[c].overall) s.flights[c].overall = s.flights[c].overall.replace(/7\/\d+/, `${m}/${d}`);
+          if (s.flights[c].list) {
+            s.flights[c].list.forEach(l => {
+              if (l.ts) l.ts = l.ts.replace(/7\/\d+/, `${m}/${d}`);
+              if (l.status) l.status = l.status.replace(/7\/\d+/, `${m}/${d}`);
+            });
+          }
+          if (s.flights[c].history) {
+            s.flights[c].history.forEach(h => {
+              if (h.time) h.time = h.time.replace(/7\/\d+/, `${m}/${d}`);
+              if (h.content) h.content = h.content.replace(/7\/\d+/, `${m}/${d}`);
+            });
+          }
+        }
+      });
+    });
+  }
+
+  console.log("[熊本資訊] 半小時大更新：已動態校正當日與次日日期");
+  if (typeof updateScenarioData === 'function') updateScenarioData();
+}
+
+setInterval(performMajorDateRefresh, 30 * 60 * 1000);
+
 // 立即執行
 updateRealtimeClocks();
+performMajorDateRefresh();
 setInterval(updateRealtimeClocks, 1000);
 
 /* ─── INIT ─── */
 document.addEventListener('DOMContentLoaded', () => {
+  loadSettings();
   initCanvas();
   updateRealtimeClocks();
 

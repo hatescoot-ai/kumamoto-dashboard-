@@ -76,6 +76,9 @@
         <button class="refresh-btn" id="refreshBtn" onclick="fetchAllData()">
           <span id="refreshIcon">&#8635;</span> 刷新
         </button>
+        <button class="refresh-btn" id="settingsBtn" onclick="toggleSettingsModal()" style="margin-left:8px; background:var(--bg3);">
+          <span>⚙️</span> 後台
+        </button>
       </div>
     </div>
   </div>
@@ -102,8 +105,18 @@
   <div class="sub-section">
     <div class="sub-header"><span class="sub-icon">🚄</span><h2>鐵路營運狀況</h2></div>
 
+    <!-- 官方緊急公告區 -->
+    <div class="official-announcements" id="jrkyushu-announcements" style="margin-bottom: 15px; padding: 15px; background: rgba(255,50,50,0.05); border: 1px solid rgba(255,50,50,0.2); border-radius: 8px;">
+      <h3 style="color: var(--red); font-size: 1.05rem; margin-top: 0; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+        📢 JR九州 官方緊急運行公告 <span class="loading-indicator" id="jrLoadingIndicator"></span>
+      </h3>
+      <div id="jrkyushu-pdf-list" style="display: flex; flex-direction: column; gap: 8px;">
+        <span class="loading-text">正在從官網抓取最新 PDF...</span>
+      </div>
+    </div>
+
     <!-- 九州新幹線 -->
-    <div class="rail-card suspended">
+    <div class="rail-card suspended" id="shinkansen_kyushu">
       <div class="rail-card-header">
         <div class="rail-badge shinkansen">新幹線</div>
         <div class="rail-title-block">
@@ -185,7 +198,7 @@
     </div>
 
     <!-- 鹿兒島本線 -->
-    <div class="rail-card suspended">
+    <div class="rail-card suspended" id="rail_kagoshima">
       <div class="rail-card-header">
         <div class="rail-badge local-line">在來線</div>
         <div class="rail-title-block">
@@ -212,7 +225,7 @@
     </div>
 
     <!-- 豐肥本線 -->
-    <div class="rail-card suspended">
+    <div class="rail-card suspended" id="rail_hohi">
       <div class="rail-card-header">
         <div class="rail-badge local-line">在來線</div>
         <div class="rail-title-block">
@@ -239,7 +252,7 @@
     </div>
 
     <!-- 特急 A列車で行こう -->
-    <div class="rail-card suspended">
+    <div class="rail-card suspended" id="rail_atrain">
       <div class="rail-card-header">
         <div class="rail-badge express-line">特急列車</div>
         <div class="rail-title-block">
@@ -258,7 +271,7 @@
     </div>
 
     <!-- 三角線 -->
-    <div class="rail-card suspended">
+    <div class="rail-card suspended" id="rail_misumi">
       <div class="rail-card-header">
         <div class="rail-badge local-line">在來線</div>
         <div class="rail-title-block">
@@ -279,7 +292,7 @@
       </div>
       <a href="https://www.jrkyushu.co.jp/railway/index.html" target="_blank" rel="noopener" class="official-link">JR九州 官方運行情報 →</a>
     </div>
-    <div class="rail-card recovered">
+    <div class="rail-card recovered" id="rail_tram">
       <div class="rail-card-header">
         <div class="rail-badge tram-badge">市電</div>
         <div class="rail-title-block">
@@ -311,7 +324,7 @@
       <div class="road-card">
         <h3 class="road-card-title">⛔ 高速公路封閉路段</h3>
         <div class="road-list">
-          <div class="road-item suspended-rd">
+          <div class="road-item suspended-rd" id="highway_e3">
             <span class="rd-icon">🚧</span>
             <div>
               <div class="rd-title">E3 九州自動車道（主要被災段）</div>
@@ -359,7 +372,7 @@
       <div class="road-card">
         <h3 class="road-card-title">🚌 高速巴士運行狀況</h3>
         <div class="road-list">
-          <div class="road-item suspended-rd">
+          <div class="road-item suspended-rd" id="bus_hinokuni">
             <span class="rd-icon">🚌</span>
             <div>
               <div class="rd-title">福岡（天神・博多）↔ 熊本「ひのくに号」</div>
@@ -405,7 +418,7 @@
         <p class="road-note">⚠ 其他路線高速巴士請上各巴士公司官網查詢最新資訊</p>
         <div class="bus-links">
           <a href="https://www.nishitetsu.jp/bus/highwaybus/" target="_blank" rel="noopener" class="bus-link">西鐵巴士 →</a>
-          <a href="https://www.kyusanko.co.jp/sankobus/" target="_blank" rel="noopener" class="bus-link">九州産交 →</a>
+          <a href="https://www.sankobus.jp/unkojokyo/" target="_blank" rel="noopener" class="bus-link">九州産交 →</a>
           <a href="https://www.ibus.co.jp/" target="_blank" rel="noopener" class="bus-link">いわさきバス →</a>
         </div>
       </div>
@@ -540,7 +553,7 @@
           <a href="https://www.china-airlines.com/tw/zh/fly/prepare-for-fly/special-info/earthquake-japan" target="_blank" rel="noopener" class="airline-name-link ci-name">
             <span class="airline-logo-text">CI</span> 中華航空 China Airlines
           </a>
-          <span class="airline-overall-status status-ok">✅ 7/29 恢復營運（加開疏運）</span>
+          <span class="airline-overall-status status-ok" id="ci-overall">✅ 7/29 恢復營運（加開疏運）</span>
         </div>
         <!-- 退改政策 -->
         <div class="refund-policy-box ci-policy">
@@ -581,7 +594,7 @@
           <a href="https://www.evaair.com/zh-tw/index.html" target="_blank" rel="noopener" class="airline-name-link br-name">
             <span class="airline-logo-text br-logo">BR</span> 長榮航空 EVA Air
           </a>
-          <span class="airline-overall-status status-ok">✅ 正常營運（無直飛熊本）</span>
+          <span class="airline-overall-status status-ok" id="br-overall">✅ 正常營運（無直飛熊本）</span>
         </div>
         <div class="refund-policy-box br-policy">
           <div class="policy-title">📋 退改票政策（官方最新公告）</div>
@@ -618,7 +631,7 @@
           <a href="https://www.starlux-airlines.com/zh-TW" target="_blank" rel="noopener" class="airline-name-link jx-name">
             <span class="airline-logo-text jx-logo">JX</span> 星宇航空 STARLUX
           </a>
-          <span class="airline-overall-status status-ok">✅ 7/29 恢復營運（加開疏運）</span>
+          <span class="airline-overall-status status-ok" id="jx-overall">✅ 7/29 恢復營運（加開疏運）</span>
         </div>
         <div class="refund-policy-box jx-policy">
           <div class="policy-title">📋 退改票政策（官方最新公告）</div>
@@ -656,7 +669,7 @@
           <a href="https://www.tigerairtw.com/zh-tw" target="_blank" rel="noopener" class="airline-name-link it-name">
             <span class="airline-logo-text it-logo">IT</span> 台灣虎航 Tigerair Taiwan
           </a>
-          <span class="airline-overall-status status-warn">⚠ 延後補飛疏運中</span>
+          <span class="airline-overall-status status-warn" id="it-overall">⚠ 延後補飛疏運中</span>
         </div>
         <div class="refund-policy-box it-policy">
           <div class="policy-title">📋 退改票政策（官方最新公告）</div>
@@ -695,7 +708,7 @@
 
     <div class="airport-grid">
 
-      <div class="airport-card ok-airport">
+      <div class="airport-card ok-airport" id="airport_kmj">
         <div class="airport-header">
           <div class="airport-iata ok-iata">KMJ</div>
           <div>
@@ -960,11 +973,11 @@
       </div>
     </div>
 
-    <h3 class="feed-title" style="margin:1.2rem 0 .6rem">🌏 USGS 即時地震資料（九州周邊 M4.5+）<span class="loading-indicator" id="usgsLoadingIndicator"></span></h3>
+    <h3 class="feed-title" style="margin:1.2rem 0 .6rem">🌏 日本氣象廳(JMA) 即時地震資料（熊本周邊）<span class="loading-indicator" id="jmaLoadingIndicator"></span></h3>
     <div class="usgs-table-wrapper">
       <table class="usgs-table">
-        <thead><tr><th>時間（JST）</th><th>地點</th><th>規模</th><th>深度</th></tr></thead>
-        <tbody id="usgsTableBody"><tr><td colspan="4" class="loading-text">載入中...</td></tr></tbody>
+        <thead><tr><th>時間（JST）</th><th>地點</th><th>最大震度</th><th>規模</th></tr></thead>
+        <tbody id="jmaTableBody"><tr><td colspan="4" class="loading-text">載入中...</td></tr></tbody>
       </table>
     </div>
 
@@ -1006,10 +1019,9 @@
   <div class="footer-inner">
     <div class="footer-sources">
       <h4>資料來源</h4>
-      <div class="source-links">
-        <a href="https://www.jma.go.jp/" target="_blank" rel="noopener">日本氣象廳 JMA</a>
-        <a href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS</a>
-        <a href="https://api.p2pquake.net/" target="_blank" rel="noopener">P2P地震情報</a>
+      <div class="footer-links">
+        <a href="https://www.jma.go.jp/" target="_blank" rel="noopener">JMA (日本氣象廳)</a>
+        <a href="https://www.jartic.or.jp/" target="_blank" rel="noopener">JARTIC</a>
         <a href="https://www.jrkyushu.co.jp/" target="_blank" rel="noopener">JR九州 官網</a>
         <a href="https://www.c-ihighway.jp/pcsite/map?area=area09" target="_blank" rel="noopener">iHighway 九州地圖 (c-ihighway)</a>
         <a href="https://ihighway.jp/pcsite/map/?area=area09" target="_blank" rel="noopener">iHighway 九州路況 (ihighway)</a>
@@ -1034,7 +1046,39 @@
   <span id="toastMsg">✅ 全站資料已完成最新同步與刷新！</span>
 </div>
 
+<!-- SETTINGS MODAL -->
+<div id="settingsModal" class="settings-modal">
+  <div class="settings-modal-content">
+    <div class="settings-modal-header">
+      <h2>⚙️ 後台設定 (Backend Options)</h2>
+      <button class="close-btn" onclick="toggleSettingsModal()">×</button>
+    </div>
+    <div class="settings-modal-body">
+      <div class="setting-item">
+        <label for="toggleDualVerify" style="flex: 1; cursor: pointer;">
+          <div class="setting-label-text">啟用官方與台日新聞雙重驗證</div>
+          <div class="setting-desc">自動比對台灣與日本新聞來源，標註雙重確認標章</div>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="toggleDualVerify" onchange="saveSettings()">
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <div class="setting-item">
+        <label for="toggleFlightCheck" style="flex: 1; cursor: pointer;">
+          <div class="setting-label-text">啟用航班資訊即時查核</div>
+          <div class="setting-desc">針對四大航空模擬查核航班公開動態</div>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="toggleFlightCheck" onchange="saveSettings()">
+          <span class="slider round"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/scenarios.js"></script>
 <script src="app.js?v=7.0"></script>
 </body>
 </html>
-
