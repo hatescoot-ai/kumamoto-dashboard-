@@ -23,8 +23,9 @@
       <span class="m-item wish-tag"><span class="m-badge wish">🙏 平安回家</span> 祝各位旅客平安回家</span>
       <span class="m-item clock-tag">🇯🇵 日本 JST <strong id="jstClock">--:--:--</strong></span>
       <span class="m-item clock-tag">🇹🇼 台灣 TST <strong id="tstClock">--:--:--</strong></span>
-      <span class="m-item eq-tag red">🔴 規模 <strong class="m-val red">7.1 M</strong></span>
+      <span class="m-item eq-tag red">🔴 主震規模 <strong class="m-val red">7.1 M</strong></span>
       <span class="m-item eq-tag orange">🟠 最大震度 <strong class="m-val orange">7級</strong></span>
+      <span class="m-item eq-tag" id="marqueeLatestEq" style="display:none">🟡 最新餘震 <strong class="m-val" id="marqueeLatestMag">--</strong></span>
       <span class="m-item notice-tag"><span class="m-badge sys">📢 官方資訊整理</span> 請以日方與航空公司最新公告為準</span>
       <span class="m-item em-tag purple">🚨 駐福岡分處急難專線：<a href="tel:+819019820010" class="m-link">+81-90-1982-0010</a> (日本直撥 090-1982-0010)</span>
       <span class="m-item em-tag blue">🏢 辦事處電話：<a href="tel:+81927342810" class="m-link">+81-92-734-2810</a></span>
@@ -34,8 +35,9 @@
       <span class="m-item wish-tag"><span class="m-badge wish">🙏 平安回家</span> 祝各位旅客平安回家</span>
       <span class="m-item clock-tag">🇯🇵 日本 JST <strong id="jstClock2">--:--:--</strong></span>
       <span class="m-item clock-tag">🇹🇼 台灣 TST <strong id="tstClock2">--:--:--</strong></span>
-      <span class="m-item eq-tag red">🔴 規模 <strong class="m-val red">7.1 M</strong></span>
+      <span class="m-item eq-tag red">🔴 主震規模 <strong class="m-val red">7.1 M</strong></span>
       <span class="m-item eq-tag orange">🟠 最大震度 <strong class="m-val orange">7級</strong></span>
+      <span class="m-item eq-tag" id="marqueeLatestEq2" style="display:none">🟡 最新餘震 <strong class="m-val" id="marqueeLatestMag2">--</strong></span>
       <span class="m-item notice-tag"><span class="m-badge sys">📢 官方資訊整理</span> 請以日方與航空公司最新公告為準</span>
       <span class="m-item em-tag purple">🚨 駐福岡分處急難專線：<a href="tel:+819019820010" class="m-link">+81-90-1982-0010</a> (日本直撥 090-1982-0010)</span>
       <span class="m-item em-tag blue">🏢 辦事處電話：<a href="tel:+81927342810" class="m-link">+81-92-734-2810</a></span>
@@ -62,8 +64,9 @@
           <span class="clock-time" id="tstClockDesktop">--:--:--</span>
         </div>
       </div>
-      <div class="mag-box header-desktop-only"><span class="box-label">規模</span><span class="box-val red">7.1</span><span class="box-unit">M</span></div>
+      <div class="mag-box header-desktop-only"><span class="box-label">主震</span><span class="box-val red">7.1</span><span class="box-unit">M</span></div>
       <div class="mag-box orange header-desktop-only"><span class="box-label">最大震度</span><span class="box-val">7</span></div>
+      <div class="mag-box header-desktop-only" id="latestEqBox" style="display:none; border-color:rgba(255,200,0,0.4);"><span class="box-label" id="latestEqLabel">最新餘震</span><span class="box-val" id="latestEqVal" style="color:#ffcc00;">--</span><span class="box-unit">M</span></div>
       <div class="timer-wrap">
         <div class="timer-ring-wrap">
           <svg viewBox="0 0 40 40" class="timer-svg">

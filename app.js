@@ -309,9 +309,37 @@ async function loadJMA() {
       let rdt = f.rdt ? toJST(new Date(f.rdt).getTime()) : f.ctt;
       let place = esc(f.anm || '-');
       let maxi = esc(f.maxi || '-');
-      let rowHtml = `<tr><td>${rdt}</td><td>${place}</td><td>震度 ${maxi}</td><td class="${mc}">M ${magVal.toFixed(1)}</td></tr>`;
-      return rowHtml;
+      return `<tr><td>${rdt}</td><td>${place}</td><td>震度 ${maxi}</td><td class="${mc}">M ${magVal.toFixed(1)}</td></tr>`;
     }).join('');
+
+    // Update header with latest aftershock (exclude main M7.1)
+    const aftershocks = features.filter(f => parseFloat(f.mag) < 7.0 && parseFloat(f.mag) >= 4.0);
+    if (aftershocks.length > 0) {
+      const latest = aftershocks[0]; // most recent
+      const lm = parseFloat(latest.mag).toFixed(1);
+      const lt = latest.rdt ? toJST(new Date(latest.rdt).getTime()) : '';
+      const lColor = parseFloat(latest.mag) >= 5.5 ? '#ff4444' : parseFloat(latest.mag) >= 4.5 ? '#ff8800' : '#ffcc00';
+      const label = `最新餘震 ${lt}`;
+      const val = `M${lm}`;
+
+      // Desktop box
+      const box = document.getElementById('latestEqBox');
+      if (box) { box.style.display = ''; box.style.borderColor = lColor + '66'; }
+      const boxLabel = document.getElementById('latestEqLabel');
+      if (boxLabel) boxLabel.textContent = label;
+      const boxVal = document.getElementById('latestEqVal');
+      if (boxVal) { boxVal.textContent = lm; boxVal.style.color = lColor; }
+
+      // Marquee
+      ['marqueeLatestEq','marqueeLatestEq2'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.style.display = ''; el.style.color = lColor; }
+      });
+      ['marqueeLatestMag','marqueeLatestMag2'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = val; el.style.color = lColor; }
+      });
+    }
   } catch(e) {
     console.warn('JMA error', e);
     tbody.innerHTML = '<tr><td colspan="4" class="loading-text" style="color:var(--red)">JMA 資料載入失敗</td></tr>';
