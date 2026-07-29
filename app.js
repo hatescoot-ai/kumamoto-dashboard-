@@ -168,47 +168,52 @@ function setRefreshing(on) {
 }
 
 /* ─── ANTI-BOT & CORS PROXY ROTATION FETCH ─── */
-async function safeFetchJSON(url, timeoutMs = 10000) {
-  const separator = url.includes('?') ? '&' : '?';
-  const targetUrl = `${url}${separator}_t=${Date.now()}`;
+const CORS_PROXIES = [
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+];
 
-  // 1. Direct fetch with cache buster
+async function safeFetchJSON(url, timeoutMs = 5000) {
+  const bust = url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now();
+
+  // 1. Direct fetch
   try {
-    const res = await fetch(targetUrl, { signal: AbortSignal.timeout(timeoutMs), cache: 'no-cache' });
-    if (res.ok) {
-      const data = await res.json();
-      if (data) return data;
-    }
-  } catch (e) {
-    console.warn('[防擋爬蟲] 直連 API 被擋或連線超時，自動切換至 CORS/Anti-bot 備用源：', url);
-  }
+    const res = await fetch(bust, { signal: AbortSignal.timeout(timeoutMs), cache: 'no-cache' });
+    if (res.ok) { const d = await res.json(); if (d) return d; }
+  } catch(e) { console.warn('[CORS] 直連失敗:', url); }
 
-  // 2. Fallback to AllOrigins proxy
-  try {
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-    const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(timeoutMs), cache: 'no-cache' });
-    if (res.ok) {
-      const data = await res.json();
-      if (data) return data;
-    }
-  } catch (e) {
-    console.warn('[防擋爬蟲] 備用源請求失敗：', e);
+  // 2. Rotate through CORS proxies
+  for (const mkProxy of CORS_PROXIES) {
+    try {
+      const res = await fetch(mkProxy(bust), { signal: AbortSignal.timeout(timeoutMs), cache: 'no-cache' });
+      if (res.ok) { const d = await res.json(); if (d) return d; }
+    } catch(e) { /* next proxy */ }
   }
-
+  console.warn('[CORS] 所有代理均失敗:', url);
   return null;
 }
 
-async function safeFetchText(url, timeoutMs = 10000) {
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+async function safeFetchText(url, timeoutMs = 3000) {
+  // Try AllOrigins (returns {contents: "..."})
   try {
-    const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(timeoutMs), cache: 'no-cache' });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.contents) return data.contents;
-    }
-  } catch(e) {
-    console.warn('[防擋爬蟲] HTML 抓取失敗:', e);
-  }
+    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(timeoutMs), cache: 'no-cache' });
+    if (res.ok) { const d = await res.json(); if (d && d.contents) return d.contents; }
+  } catch(e) { /* next */ }
+
+  // Try corsproxy.io (returns raw HTML)
+  try {
+    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(timeoutMs), cache: 'no-cache' });
+    if (res.ok) return await res.text();
+  } catch(e) { /* next */ }
+
+  // Try codetabs (returns raw HTML)
+  try {
+    const res = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(timeoutMs), cache: 'no-cache' });
+    if (res.ok) return await res.text();
+  } catch(e) { /* next */ }
+
+  console.warn('[CORS] HTML 所有代理均失敗:', url);
   return null;
 }
 
