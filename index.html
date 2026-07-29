@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css?v=4.0"/>
+  <link rel="stylesheet" href="style.css?v=5.0"/>
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
@@ -318,10 +318,18 @@
           <div class="road-item suspended-rd">
             <span class="rd-icon">🚧</span>
             <div>
-              <div class="rd-title">E3 九州自動車道</div>
-              <div class="rd-desc"><strong>植木IC ↔ えびのIC</strong> 上下線通行止め（NEXCO西日本 23:00時点）</div>
+              <div class="rd-title">E3 九州自動車道（主要被災段）</div>
+              <div class="rd-desc"><strong>益城熊本空港IC ↔ えびのIC</strong> 上下線通行止め（NEXCO西日本 7/29 01:00最新PDF公告）</div>
             </div>
             <span class="rd-badge suspended-badge-sm">封閉</span>
+          </div>
+          <div class="road-item ok-rd">
+            <span class="rd-icon">✅</span>
+            <div>
+              <div class="rd-title">E3 九州自動車道（植木↔益城）</div>
+              <div class="rd-desc"><strong>植木IC ↔ 益城熊本空港IC</strong> 7/29 00:42 通行止め解除、恢復通行！（NEXCO西日本PDF）</div>
+            </div>
+            <span class="rd-badge ok-badge-sm">解除</span>
           </div>
           <div class="road-item suspended-rd">
             <span class="rd-icon">🚧</span>
@@ -342,16 +350,8 @@
           <div class="road-item ok-rd">
             <span class="rd-icon">✅</span>
             <div>
-              <div class="rd-title">E3 九州自動車道（南部）</div>
-              <div class="rd-desc"><strong>えびのIC ↔ 栗野IC</strong> 20:31 通行止め解除（NEXCO西日本公告）</div>
-            </div>
-            <span class="rd-badge ok-badge-sm">解除</span>
-          </div>
-          <div class="road-item ok-rd">
-            <span class="rd-icon">✅</span>
-            <div>
-              <div class="rd-title">E10 宮崎自動車道</div>
-              <div class="rd-desc"><strong>えびのJCT ↔ 高原IC</strong> 20:31 通行止め解除（NEXCO西日本公告）</div>
+              <div class="rd-title">E3 九州自動車道（南部）＆ E10 宮崎道</div>
+              <div class="rd-desc"><strong>えびのIC ↔ 栗野IC / えびのJCT ↔ 高原IC</strong> 7/28 20:31 通行止め解除（NEXCO西日本）</div>
             </div>
             <span class="rd-badge ok-badge-sm">解除</span>
           </div>
@@ -694,18 +694,18 @@
 
     <div class="airport-grid">
 
-      <div class="airport-card suspended-airport">
+      <div class="airport-card ok-airport">
         <div class="airport-header">
-          <div class="airport-iata">KMJ</div>
+          <div class="airport-iata ok-iata">KMJ</div>
           <div>
             <div class="airport-name">阿蘇熊本機場</div>
-            <div class="airport-status-line"><span class="ap-badge suspended-badge">⛔ 暫停</span></div>
+            <div class="airport-status-line"><span class="ap-badge ok-badge-ap">✅ 7/29 正常運航再開</span></div>
           </div>
         </div>
         <div class="airport-detail">
-          <div class="ap-row"><span class="ap-label">跑道狀況</span><span class="ap-val ok-text">✅ <strong>19:00 已恢復運用</strong>（地震後暫時關閉，安全確認後再開）</span></div>
-          <div class="ap-row"><span class="ap-label">7/28航班</span><span class="ap-val suspended-text">計32便受影響（欠航27便，目的地変更等4便）</span></div>
-          <div class="ap-row"><span class="ap-label">7/29預定</span><span class="ap-val warn-text"><strong>13:00以降の便より通常運航予定</strong>（JAL等公告，視餘震狀況）</span></div>
+          <div class="ap-row"><span class="ap-label">設施與跑道</span><span class="ap-val ok-text">✅ <strong>安全點檢完成，7/29 起恢復運航！</strong></span></div>
+          <div class="ap-row"><span class="ap-label">7/29 運航狀況</span><span class="ap-val ok-text">各航空公司班機陸續恢復起降（部分班次仍有調整，詳見各航空官網）</span></div>
+          <div class="ap-row"><span class="ap-label">航廈設施</span><span class="ap-val warn-text">航廈點檢安全，部分餐飲與商店進行營運整備</span></div>
           <div class="ap-row"><span class="ap-label">台灣航線</span><span class="ap-val">TPE（華航CI、星宇JX、虎航IT）、TXG（星宇JX）</span></div>
         </div>
         <a href="https://www.kumamoto-airport.co.jp/zh-TW/" target="_blank" rel="noopener" class="official-link">阿蘇熊本機場繁體中文官網 →</a>
@@ -1027,6 +1027,6 @@
   </div>
 </footer>
 
-<script src="app.js?v=4.0"></script>
+<script src="app.js?v=5.0"></script>
 </body>
 </html>
