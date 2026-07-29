@@ -270,11 +270,37 @@ window.sendFeedback = function() {
   window.open(gmailUrl, '_blank', 'noopener');
 };
 
+/* ─── TOAST NOTIFICATION ─── */
+let toastTimeout = null;
+function showToast(msg) {
+  const toast = document.getElementById('refreshToast');
+  const txt   = document.getElementById('toastMsg');
+  if (!toast) return;
+  if (txt && msg) txt.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+/* ─── CARD PULSE ANIMATION ─── */
+function animateAllCards() {
+  const cards = document.querySelectorAll('.rail-card, .road-card, .airline-full-card, .airport-card, .spot-transport-card');
+  cards.forEach(card => {
+    card.classList.remove('card-pulse-effect');
+    void card.offsetWidth; // trigger reflow
+    card.classList.add('card-pulse-effect');
+  });
+}
+
 /* ─── MAIN FETCH ─── */
-window.fetchAllData = async function() {
+window.fetchAllData = async function(isManual = false) {
   setRefreshing(true);
   setLoading('usgsLoadingIndicator', true);
   setLoading('eqLoadingIndicator', true);
+
+  // 1. 觸發全站所有卡片的動態刷新動畫視覺反饋
+  animateAllCards();
+
   try {
     await Promise.allSettled([
       loadUSGS(),
@@ -285,9 +311,17 @@ window.fetchAllData = async function() {
     setRefreshing(false);
     setLoading('usgsLoadingIndicator', false);
     setLoading('eqLoadingIndicator', false);
+
+    // 2. 更新頂部與頁尾的時間標籤至當前精確時間
     stampTime();
+
+    // 3. 重置5分鐘倒數圓環至 05:00
     startTimer();
-    console.log('[熊本資訊] 已更新：', nowTW());
+
+    // 4. 彈出全站已更新完成的 Toast 提示通知
+    showToast('✅ 全站資料已完成最新同步與刷新！（含鐵公路/航班/市電/地震）');
+
+    console.log('[熊本資訊] 全站已完成刷新與同步：', nowTW());
   }
 };
 
