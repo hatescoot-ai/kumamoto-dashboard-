@@ -227,8 +227,9 @@ async function loadJRKyushuAnnouncements() {
       'https://www.jrkyushu.co.jp/trains/info/'
     ];
     
+    // Quick 2.5s timeout to prevent UI hanging
     const htmlResults = await Promise.allSettled(
-      urlsToFetch.map(url => safeFetchText(url, 10000))
+      urlsToFetch.map(url => safeFetchText(url, 2500))
     );
     
     let linksMap = new Map();
@@ -242,7 +243,7 @@ async function loadJRKyushuAnnouncements() {
         aTags.forEach(a => {
           let text = a.textContent.trim() || '未命名 PDF 公告';
           let url = a.href.startsWith('http') ? a.href : 'https://www.jrkyushu.co.jp' + (a.getAttribute('href').startsWith('/') ? '' : '/') + a.getAttribute('href');
-          if (text.includes('運行計画') || url.includes('emergency')) {
+          if (text.includes('運行計画') || url.includes('emergency') || text.includes('地震')) {
             linksMap.set(url, text);
           }
         });
@@ -260,7 +261,9 @@ async function loadJRKyushuAnnouncements() {
     }).join('');
   } catch(e) {
     console.warn('JR Kyushu fetch error', e);
-    container.innerHTML = '<span class="loading-text" style="color:var(--red)">官網連線失敗</span>';
+    if (typeof JR_FALLBACK !== 'undefined') {
+      container.innerHTML = JR_FALLBACK.map(l => `<a href="${l.url}" target="_blank" rel="noopener" style="text-decoration:none; color:var(--red); font-weight:bold; font-size:.95rem; display:flex; align-items:center; gap:6px; padding: 4px 0;">📄 ${esc(l.text)}</a>`).join('');
+    }
   } finally {
     setLoading('jrLoadingIndicator', false);
   }
@@ -416,19 +419,27 @@ function animateAllCards() {
   });
 }
 
+function getTaiwanDate() {
+  const now = new Date();
+  return new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (8 * 3600000));
+}
+
+function getScenarioDay() {
+  const tw = getTaiwanDate();
+  const date = tw.getDate();
+  const month = tw.getMonth() + 1;
+  if (month < 7) return 1;
+  if (month > 7) return 3;
+  let days = date - 28;
+  if (isNaN(days) || days < 1) days = 1;
+  if (days > 3) days = 3;
+  return days;
+}
+
 /* ─── DYNAMIC SCENARIOS ─── */
 function updateScenarioData() {
   if (typeof SCENARIOS === 'undefined') return;
-  
-  // Use Taipei timezone to determine the current date
-  const nowStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Taipei" });
-  const nowTw = new Date(nowStr);
-  
-  // eqDate was 7/28
-  let days = nowTw.getDate() - 28;
-  if (nowTw.getMonth() > 6) days += 31; // simple rollover for July -> August if needed
-  if (days < 1) days = 1;
-
+  const days = getScenarioDay();
   const s = SCENARIOS[days] || SCENARIOS[3];
   
   // Airlines
@@ -583,7 +594,7 @@ function updateRealtimeClocks() {
 
 /* ─── 30 MIN MAJOR DATE REFRESH ─── */
 function performMajorDateRefresh() {
-  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Taipei" }));
+  const now = getTaiwanDate();
   const tmrw = new Date(now.getTime() + 86400000);
   
   const m = now.getMonth() + 1;
@@ -611,11 +622,12 @@ function performMajorDateRefresh() {
       if (!s) return;
       s.dateStr = `${m}/${d}`;
       
-      if (s.transport && s.transport.shinkansen_kyushu && s.transport.shinkansen_kyushu.row3Label) {
-        s.transport.shinkansen_kyushu.row3Label = s.transport.shinkansen_kyushu.row3Label.replace(/7\/\d+/, `${m}/${d}`);
-        if (s.transport.shinkansen_kyushu.row3Val) {
-          s.transport.shinkansen_kyushu.row3Val = s.transport.shinkansen_kyushu.row3Val.replace(/7\/\d+/, `${m}/${d}`);
-        }
+      if (s.transport && s.transport.shinkansen_kyushu) {
+        const sh = s.transport.shinkansen_kyushu;
+        if (sh.row2Label) sh.row2Label = sh.row2Label.replace(/7\/\d+/, `${m}/${d}`);
+        if (sh.row2Val) sh.row2Val = sh.row2Val.replace(/7\/\d+/, `${m}/${d}`);
+        if (sh.row3Label) sh.row3Label = sh.row3Label.replace(/7\/\d+/, `${m}/${d}`);
+        if (sh.row3Val) sh.row3Val = sh.row3Val.replace(/7\/\d+/, `${m}/${d}`);
       }
       
       if (s.transport && s.transport.highway_e3 && s.transport.highway_e3.desc) {
