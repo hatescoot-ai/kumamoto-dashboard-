@@ -335,7 +335,11 @@ async function loadJRKyushuAnnouncements() {
     let links = Array.from(linksMap.entries()).map(([url, text]) => ({ url, text }));
     if (links.length === 0) links = JR_FALLBACK;
 
-    // Build clean announcement links (no duplicate table)
+    // Pick ONLY the single most important primary PDF link (prefer 運行狀況/運行計畫)
+    let mainPdf = links.find(l => l.text.includes('運行状況') || l.text.includes('運行計画') || l.text.includes('被害状況')) || links[0];
+    links = mainPdf ? [mainPdf] : links.slice(0, 1);
+
+    // Build clean announcement links (single primary official link)
     container.innerHTML = links.map(l => {
       let badge = backendSettings.dualVerify ? '<span class="verified-badge">✅ 官方發布比對無誤</span>' : '';
       return `<a href="${l.url}" target="_blank" rel="noopener" style="text-decoration:none; color:var(--red); font-weight:bold; font-size:.95rem; display:flex; align-items:center; gap:8px; padding:10px 14px; background:rgba(255,50,50,0.06); border:1px solid rgba(255,50,50,0.18); border-radius:8px; margin-bottom:6px;">
