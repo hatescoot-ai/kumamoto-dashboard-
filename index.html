@@ -444,11 +444,12 @@
             <span class="rd-badge ok-badge-sm">正常</span>
           </div>
         </div>
-        <p class="road-note">⚠ 其他路線高速巴士請上各巴士公司官網查詢最新資訊</p>
+        <p class="road-note">⚠ 高速巴士即時動態與官方公告連結：</p>
         <div class="bus-links">
-          <a href="https://www.nishitetsu.jp/bus/highwaybus/" target="_blank" rel="noopener" class="bus-link">西鐵巴士 →</a>
-          <a href="https://www.sankobus.jp/unkojokyo/" target="_blank" rel="noopener" class="bus-link">九州産交 →</a>
-          <a href="https://www.ibus.co.jp/" target="_blank" rel="noopener" class="bus-link">いわさきバス →</a>
+          <a href="https://www.sankobus.jp/unkojokyo/" target="_blank" rel="noopener" class="bus-link" style="border-color:var(--red);color:var(--red);">九州産交巴士 運行狀況 ↗</a>
+          <a href="http://www.norimono-info.com/" target="_blank" rel="noopener" class="bus-link" style="border-color:#ff9900;color:#ff9900;">九州のりもの安心情報 ↗</a>
+          <a href="https://www.nishitetsu.jp/bus/highwaybus/" target="_blank" rel="noopener" class="bus-link">西鐵巴士 ↗</a>
+          <a href="https://www.ibus.co.jp/" target="_blank" rel="noopener" class="bus-link">いわさき巴士 ↗</a>
         </div>
       </div>
 
@@ -1053,6 +1054,8 @@
     <div class="footer-sources">
       <h4>資料來源</h4>
       <div class="footer-links">
+        <a href="http://www.norimono-info.com/" target="_blank" rel="noopener">九州のりもの安心情報 (norimono-info)</a>
+        <a href="https://www.sankobus.jp/unkojokyo/" target="_blank" rel="noopener">九州產交巴士 運行狀況 (Sanko Bus)</a>
         <a href="https://www.jma.go.jp/" target="_blank" rel="noopener">JMA (日本氣象廳)</a>
         <a href="https://www.jartic.or.jp/" target="_blank" rel="noopener">JARTIC</a>
         <a href="https://www.jrkyushu.co.jp/" target="_blank" rel="noopener">JR九州 官網</a>
@@ -1087,6 +1090,16 @@
       <button class="close-btn" onclick="toggleSettingsModal()">×</button>
     </div>
     <div class="settings-modal-body">
+      <div class="setting-item">
+        <label for="toggleBusAutoSync" style="flex: 1; cursor: pointer;">
+          <div class="setting-label-text">啟用高速巴士與路況即時同步抓取</div>
+          <div class="setting-desc">自動抓取 <a href="http://www.norimono-info.com/" target="_blank" style="color:var(--txt2);text-decoration:underline;">九州のりもの安心情報</a> 與 <a href="https://www.sankobus.jp/unkojokyo/" target="_blank" style="color:var(--txt2);text-decoration:underline;">九州產交巴士運行狀況</a> 最新公告</div>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="toggleBusAutoSync" onchange="saveSettings()">
+          <span class="slider round"></span>
+        </label>
+      </div>
       <div class="setting-item">
         <label for="toggleDualVerify" style="flex: 1; cursor: pointer;">
           <div class="setting-label-text">啟用官方與台日新聞雙重驗證</div>

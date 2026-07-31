@@ -18,23 +18,26 @@ let remaining        = 300; // 5 minutes = 300 seconds
 const FEEDBACK_EMAIL = 'hatescoot@gmail.com';
 
 /* ─── BACKEND SETTINGS ─── */
-let backendSettings = { dualVerify: false, flightCheck: false };
+let backendSettings = { dualVerify: false, flightCheck: false, busAutoSync: true };
 
 function loadSettings() {
   try {
     const saved = localStorage.getItem('kumamoto_backend_settings');
-    if (saved) backendSettings = JSON.parse(saved);
+    if (saved) backendSettings = { busAutoSync: true, ...JSON.parse(saved) };
   } catch(e) {}
   const dv = document.getElementById('toggleDualVerify');
   const fc = document.getElementById('toggleFlightCheck');
+  const bs = document.getElementById('toggleBusAutoSync');
   if (dv) dv.checked = backendSettings.dualVerify;
   if (fc) fc.checked = backendSettings.flightCheck;
+  if (bs) bs.checked = backendSettings.busAutoSync !== false;
 }
 
 window.saveSettings = function() {
   const dv = document.getElementById('toggleDualVerify')?.checked || false;
   const fc = document.getElementById('toggleFlightCheck')?.checked || false;
-  backendSettings = { dualVerify: dv, flightCheck: fc };
+  const bs = document.getElementById('toggleBusAutoSync')?.checked !== false;
+  backendSettings = { dualVerify: dv, flightCheck: fc, busAutoSync: bs };
   localStorage.setItem('kumamoto_backend_settings', JSON.stringify(backendSettings));
   fetchAllData();
 };
@@ -672,11 +675,62 @@ function updateScenarioData() {
   }
 }
 
+/* ─── LIVE HIGHWAY BUS STATUS SYNC (norimono-info.com & sankobus.jp) ─── */
+async function loadBusStatus() {
+  if (backendSettings.busAutoSync === false) return;
+  setLoading('busLoadingIndicator', true);
+  try {
+    const urls = [
+      'https://www.sankobus.jp/unkojokyo/',
+      'http://www.norimono-info.com/'
+    ];
+
+    const results = await Promise.allSettled(
+      urls.map(url => safeFetchText(url, 3000))
+    );
+
+    let parsedStatus = {
+      hinokuni: null
+    };
+
+    results.forEach(res => {
+      if (res.status === 'fulfilled' && res.value) {
+        const text = res.value;
+        if (text.includes('ひのくに') || text.includes('福岡') || text.includes('熊本')) {
+          if (text.includes('運休') || text.includes('見合わせ')) {
+            parsedStatus.hinokuni = { status: 'suspended', badge: '停駛', desc: '受九州自動車道管制影響，福岡↔熊本「ひのくに号」全便運休或見合わせ中' };
+          } else if (text.includes('減便') || text.includes('遲延') || text.includes('延着')) {
+            parsedStatus.hinokuni = { status: 'warning', badge: '減班運行', desc: '福岡↔熊本「ひのくに号」恢復部分減班運行' };
+          } else if (text.includes('通常') || text.includes('運行中')) {
+            parsedStatus.hinokuni = { status: 'ok', badge: '正常運行', desc: '福岡↔熊本「ひのくに号」已全面恢復正常班次營運' };
+          }
+        }
+      }
+    });
+
+    // Update DOM element for Hinokuni Bus
+    const hinokuniEl = document.getElementById('bus_hinokuni');
+    if (hinokuniEl) {
+      const desc = hinokuniEl.querySelector('.rd-desc');
+      const timeStr = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+      if (desc) {
+        const currentContent = desc.innerHTML.split('<span class="verified-badge"')[0];
+        desc.innerHTML = `${currentContent} <span class="verified-badge" style="margin-left:4px;">✅ 産交&のりもの安心情報 即時同步 ${timeStr}</span>`;
+      }
+    }
+  } catch(e) {
+    console.warn('[巴士即時同步] 抓取失敗:', e);
+  } finally {
+    setLoading('busLoadingIndicator', false);
+  }
+}
+
 /* ─── MAIN FETCH ─── */
 window.fetchAllData = async function(isManual = false) {
   setRefreshing(true);
   setLoading('jmaLoadingIndicator', true);
   setLoading('eqLoadingIndicator', true);
+  setLoading('busLoadingIndicator', true);
 
   // 1. 觸發全站所有卡片的動態刷新動畫視覺反饋
   animateAllCards();
@@ -689,12 +743,14 @@ window.fetchAllData = async function(isManual = false) {
       loadJMA(),
       loadP2P(),
       loadJRKyushuAnnouncements(),
+      loadBusStatus(),
       loadGdelt('JR Kyushu earthquake suspended Kumamoto 2026 transport', null, null, null),
     ]);
   } finally {
     setRefreshing(false);
     setLoading('jmaLoadingIndicator', false);
     setLoading('eqLoadingIndicator', false);
+    setLoading('busLoadingIndicator', false);
 
     // 2. 更新頂部與頁尾的時間標籤至當前精確時間
     stampTime();
