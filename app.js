@@ -691,6 +691,24 @@ function updateScenarioData() {
         }
       });
     }
+
+    // Takachiho Gorge Spot Card Sync
+    const tkGorge = document.getElementById('spot_takachiho_gorge');
+    const tkTag = document.getElementById('spot_takachiho_tag');
+    const tkDesc = document.getElementById('spot_takachiho_desc');
+    if (tkGorge && tkTag && tkDesc) {
+      if (days >= 3) {
+        tkGorge.className = 'spot-card ok-spot';
+        tkTag.className = 'spot-status-tag ok-tag';
+        tkTag.textContent = '正常開放';
+        tkDesc.innerHTML = '✅ <strong>7/31起貸しボート與遊步道恢復正常營業與開放。</strong>（高千穗觀光協會官方公告）';
+      } else {
+        tkGorge.className = 'spot-card suspended-spot';
+        tkTag.className = 'spot-status-tag suspended-tag';
+        tkTag.textContent = '貸船停止';
+        tkDesc.innerHTML = '⚠ <strong>貸しボート：7月28日（火）〜7月31日（金）終日営業休止</strong>（高千穗觀光協會官方公告）。遊步道等立入も安全確認までは危険な状態。';
+      }
+    }
   }
 }
 
