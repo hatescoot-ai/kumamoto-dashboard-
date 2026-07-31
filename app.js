@@ -672,6 +672,25 @@ function updateScenarioData() {
         if (rows[1]) { rows[1].textContent = kmj.row2; }
       }
     }
+
+    const st = s.transport.spots_transport;
+    if (st) {
+      ['spt_kumamoto', 'spt_aso', 'spt_takachiho', 'spt_beppu'].forEach(id => {
+        const data = st[id];
+        const card = document.getElementById(id);
+        if (card && data) {
+          const status = card.querySelector('.spt-status');
+          if (status) {
+            status.className = `spt-status ${data.statusClass || ''}`;
+            status.textContent = data.statusTag;
+          }
+          const ul = card.querySelector('.spt-list');
+          if (ul && Array.isArray(data.items)) {
+            ul.innerHTML = data.items.map(item => `<li>${item}</li>`).join('');
+          }
+        }
+      });
+    }
   }
 }
 
